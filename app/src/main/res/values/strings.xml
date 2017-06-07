@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TravelHop</string>
+    <string name="log_in">Sign In</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="username_hint">Username</string>
+    <string name="full_name_hint">Full Name</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_acc">Already have an account?</string>
+    <string name="dont_have_acc">Don\'t have an account?</string>
+</resources>

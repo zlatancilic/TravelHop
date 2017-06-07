@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "563122727317",
+    "firebase_url": "https://travelhop-91af9.firebaseio.com",
+    "project_id": "travelhop-91af9",
+    "storage_bucket": "travelhop-91af9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563122727317:android:dcbe35bf0112e639",
+        "android_client_info": {
+          "package_name": "com.cilic.zlatan.travelhop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563122727317-p7mva804bn1qf8s29mpkm3920p2ljep4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cilic.zlatan.travelhop",
+            "certificate_hash": "351abc473f8ea884aa5f0176cbcf4b2f62698d73"
+          }
+        },
+        {
+          "client_id": "563122727317-5u84t0oapj6q56m9nu6ftatrkafuvca1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv2tk8xbPTl1nzIyiBRR232WLypw-U8z8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563122727317-5u84t0oapj6q56m9nu6ftatrkafuvca1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
