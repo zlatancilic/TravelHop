@@ -20,6 +20,21 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_view"
             android:text="Sign out"/>
+
+
+        <Button
+            android:id="@+id/take_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_out"
+            android:text="Take image"/>
+
+        <Button
+            android:id="@+id/pick_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/take_image"
+            android:text="Pick image"/>
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
