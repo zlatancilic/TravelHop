@@ -17,6 +17,20 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
+    <EditText
+        android:id="@+id/caption_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:hint="@string/caption_hint"/>
+
+    <EditText
+        android:id="@+id/location_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:hint="@string/location_hint"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

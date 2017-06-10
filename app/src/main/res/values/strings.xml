@@ -8,4 +8,6 @@
     <string name="sign_up">Sign Up</string>
     <string name="already_have_acc">Already have an account?</string>
     <string name="dont_have_acc">Don\'t have an account?</string>
+    <string name="caption_hint">Caption</string>
+    <string name="location_hint">Location</string>
 </resources>
