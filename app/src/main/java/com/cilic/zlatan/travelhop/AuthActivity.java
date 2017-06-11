@@ -405,9 +405,6 @@ public class AuthActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         if(user != null) {
-            Toast.makeText(AuthActivity.this, user.getUid(),
-                    Toast.LENGTH_SHORT).show();
-
             Intent i = new Intent(this, MainActivity.class);
             startActivity(i);
             AuthActivity.this.finish();

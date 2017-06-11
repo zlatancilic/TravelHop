@@ -1,6 +1,5 @@
 package com.cilic.zlatan.travelhop;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +7,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,10 +15,24 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import models.Post;
 
 public class MainActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
 
     Button takeImage;
     Button pickImage;
@@ -34,9 +48,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        TextView tv = (TextView) findViewById(R.id.text_view);
+        final TextView tv = (TextView) findViewById(R.id.text_view);
         tv.setText(currentUser.getUid());
 
         Button signOut = (Button) findViewById(R.id.sign_out);
@@ -72,6 +88,44 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");
+        followingList.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                List followingList = dataSnapshot.getValue(t);
+                if( followingList == null ) {
+                    System.out.println("");
+                }
+                else {
+                    ArrayList<Post> allPosts = new ArrayList<Post>();
+                    for(int i = 0; i < followingList.size(); i++) {
+                        String tempUser = followingList.get(i).toString();
+                        DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
+                        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                    Post currentPost = postSnapshot.getValue(Post.class);
+                                    //tv.setText(tv.getText() + "|" + currentPost.getDownloadPath());
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -92,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 startUploadActivity("camera");
             }
             else {
-                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT);
+                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT).show();
             }
         }
         else if(requestCode == REQUEST_GALLERY_PERMISSION) {
@@ -100,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 startUploadActivity("gallery");
             }
             else {
-                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT);
+                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT).show();
             }
         }
     }
