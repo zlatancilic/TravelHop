@@ -35,6 +35,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/take_image"
             android:text="Pick image"/>
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/pick_image"
+            android:id="@+id/userFeedListView">
+        </ListView>
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

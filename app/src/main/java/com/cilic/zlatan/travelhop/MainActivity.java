@@ -3,6 +3,8 @@ package com.cilic.zlatan.travelhop;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -10,9 +12,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -21,18 +26,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import models.Post;
+import models.PostWithImage;
+import utils.UserFeedListAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
+    List<PostWithImage> listOfPosts = new ArrayList<PostWithImage>();
     FirebaseAuth firebaseAuth;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
+    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
     Button takeImage;
     Button pickImage;
@@ -89,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ListView yourListView = (ListView) findViewById(R.id.userFeedListView);
+
+        final UserFeedListAdapter customAdapter = new UserFeedListAdapter(this, R.layout.item, listOfPosts);
+
+        yourListView.setAdapter(customAdapter);
+
         DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");
         followingList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -99,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("");
                 }
                 else {
-                    ArrayList<Post> allPosts = new ArrayList<Post>();
                     for(int i = 0; i < followingList.size(); i++) {
                         String tempUser = followingList.get(i).toString();
                         DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
@@ -107,8 +122,23 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                    Post currentPost = postSnapshot.getValue(Post.class);
-                                    //tv.setText(tv.getText() + "|" + currentPost.getDownloadPath());
+                                    final Post currentPost = postSnapshot.getValue(Post.class);
+                                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+                                    final long ONE_MEGABYTE = 1024 * 1024;
+                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
+                                            listOfPosts.add(postWithImage);
+                                            customAdapter.notifyDataSetChanged();
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                        }
+                                    });
                                 }
                             }
 
