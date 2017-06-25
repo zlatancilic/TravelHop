@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
 
         final UserFeedListAdapter customAdapter = new UserFeedListAdapter(this, R.layout.item, listOfPosts);
 
+        customAdapter.setAppContext(getApplicationContext());
+
         yourListView.setAdapter(customAdapter);
 
         DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");

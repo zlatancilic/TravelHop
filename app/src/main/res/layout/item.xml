@@ -20,10 +20,10 @@
                 android:typeface="monospace" />
 
             <ImageView
-                android:id="@+id/image"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/id"/>
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:id="@+id/image"/>
 
             <TextView
                 android:textColor="#ff0000"

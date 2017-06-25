@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.naver.android.helloyako.imagecrop.view.ImageCropView;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
@@ -35,12 +36,13 @@ import java.util.Map;
 
 public class ImageUploadActivity extends AppCompatActivity {
 
-    ImageView imageView;
+//    ImageView imageView;
     Button openGalleryButton;
     Button openCameraButton;
     Button uploadImageButton;
     EditText captionEditText;
     EditText locationEditText;
+    ImageCropView imageCropView;
 
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -57,17 +59,19 @@ public class ImageUploadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_upload);
 
-        imageView = (ImageView) findViewById(R.id.selected_image_imageview);
+//        imageView = (ImageView) findViewById(R.id.selected_image_imageview);
         openGalleryButton = (Button) findViewById(R.id.gallery_button);
         openCameraButton = (Button) findViewById(R.id.camera_button);
         uploadImageButton = (Button) findViewById(R.id.upload_image_button);
         captionEditText = (EditText) findViewById(R.id.caption_edittext);
         locationEditText = (EditText) findViewById(R.id.location_edittext);
+        imageCropView = (ImageCropView) findViewById(R.id.selected_image_imageview_offset);
+
 
         uploadImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap bitmapImage = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+                Bitmap bitmapImage = imageCropView.getViewBitmap();
                 if(bitmapImage != null) {
                     uploadImage(bitmapImage);
                 }
@@ -121,7 +125,8 @@ public class ImageUploadActivity extends AppCompatActivity {
             try {
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
-                imageView.setImageBitmap(imageBitmap);
+//                imageView.setImageBitmap(imageBitmap);
+                imageCropView.setImageBitmap(imageBitmap);
             }
             catch (Exception e) {
                 Log.i("tag", "error");
@@ -131,7 +136,8 @@ public class ImageUploadActivity extends AppCompatActivity {
             try {
                 Uri selectedImage = data.getData();
                 Bitmap bitmapImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-                imageView.setImageBitmap(bitmapImage);
+//                imageView.setImageBitmap(bitmapImage);
+                imageCropView.setImageBitmap(bitmapImage);
             }
             catch (Exception e) {
                 Log.i("tag", "error");
