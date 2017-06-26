@@ -109,50 +109,28 @@ public class MainActivity extends AppCompatActivity {
 
         yourListView.setAdapter(customAdapter);
 
-        DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");
-        followingList.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference postsReference = firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid());
+        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List followingList = dataSnapshot.getValue(t);
-                if( followingList == null ) {
-                    System.out.println("");
-                }
-                else {
-                    for(int i = 0; i < followingList.size(); i++) {
-                        String tempUser = followingList.get(i).toString();
-                        DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
-                        //Query postsQuery = postsReference.orderByChild("date_created");
-                        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                    final Post currentPost = postSnapshot.getValue(Post.class);
-                                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                                    final long ONE_MEGABYTE = 1024 * 1024;
-                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytes) {
-                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
-                                            listOfPosts.add(postWithImage);
-                                            customAdapter.notifyDataSetChanged();
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
+                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    final Post currentPost = postSnapshot.getValue(Post.class);
+                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+                    final long ONE_MEGABYTE = 1024 * 1024;
+                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
+                            listOfPosts.add(postWithImage);
+                            customAdapter.notifyDataSetChanged();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
 
-                                        }
-                                    });
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
+                        }
+                    });
                 }
             }
 
@@ -161,6 +139,59 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+//        DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");
+//        followingList.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+//                List followingList = dataSnapshot.getValue(t);
+//                if( followingList == null ) {
+//                    System.out.println("");
+//                }
+//                else {
+//                    for(int i = 0; i < followingList.size(); i++) {
+//                        String tempUser = followingList.get(i).toString();
+//                        DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
+//                        //Query postsQuery = postsReference.orderByChild("date_created");
+//                        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+//                                    final Post currentPost = postSnapshot.getValue(Post.class);
+//                                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+//                                    final long ONE_MEGABYTE = 1024 * 1024;
+//                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+//                                        @Override
+//                                        public void onSuccess(byte[] bytes) {
+//                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+//                                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
+//                                            listOfPosts.add(postWithImage);
+//                                            customAdapter.notifyDataSetChanged();
+//                                        }
+//                                    }).addOnFailureListener(new OnFailureListener() {
+//                                        @Override
+//                                        public void onFailure(@NonNull Exception e) {
+//
+//                                        }
+//                                    });
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//
+//                            }
+//                        });
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     @Override

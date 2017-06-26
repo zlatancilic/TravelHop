@@ -1,33 +1,28 @@
 package com.cilic.zlatan.travelhop;
 
-import android.*;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -38,10 +33,9 @@ import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import models.Post;
-import models.PostWithImage;
 import models.UserDetails;
 
 public class ImageUploadActivity extends AppCompatActivity {
@@ -210,6 +204,15 @@ public class ImageUploadActivity extends AppCompatActivity {
 
                     StorageReference imageRef = storageReference.child(img_path);
                     UploadTask uploadTask = imageRef.putBytes(data);
+
+                    final Map<String, String> map = new HashMap<String, String>();
+                    map.put("downloadPath", img_path);
+                    map.put("caption", caption);
+                    map.put("location", location);
+                    map.put("username", currentUser.getUsername());
+                    map.put("fullName", currentUser.getFullName());
+                    map.put("dateCreated", creation_date_format.format(timestamp));
+
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
@@ -218,17 +221,36 @@ public class ImageUploadActivity extends AppCompatActivity {
                     }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Map<String, String> map = new HashMap<String, String>();
-                            map.put("downloadPath", img_path);
-                            map.put("caption", caption);
-                            map.put("location", location);
-                            map.put("username", currentUser.getUsername());
-                            map.put("fullName", currentUser.getFullName());
-                            map.put("dateCreated", creation_date_format.format(timestamp));
-                            String key = databaseReference.child("activityStreamPosts").push().getKey();
+
+                            final String key = databaseReference.child("activityStreamPosts").push().getKey();
                             databaseReference.child("activityStreamPosts").child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
 
-                            Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+                            final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/followers/";
+                            DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
+                            followersList.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                                    List followersList = dataSnapshot.getValue(t);
+                                    Log.i("LENGTH OF FOLLOWERS", String.valueOf(followersList.size()));
+                                    if( followersList == null ) {
+                                        System.out.println("");
+                                    }
+                                    else {
+                                        for(int i = 0; i < followersList.size(); i++) {
+                                            String tempUser = followersList.get(i).toString();
+                                            databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
+                                        }
+                                        Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                         }
                     });
                 }
