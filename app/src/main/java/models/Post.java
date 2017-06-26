@@ -6,17 +6,21 @@ public class Post {
     public Post() {
     }
 
-    public Post(String dateCreated, String downloadPath, String caption, String location) {
+    public Post(String dateCreated, String downloadPath, String caption, String location,String fullName, String username) {
         this.dateCreated = dateCreated;
         this.downloadPath = downloadPath;
         this.caption = caption;
         this.location = location;
+        this.fullName = fullName;
+        this.username = username;
     }
 
     private String dateCreated;
     private String downloadPath;
     private String caption;
     private String location;
+    private String fullName;
+    private String username;
 
     public String getDateCreated() {
         return dateCreated;
@@ -48,5 +52,21 @@ public class Post {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

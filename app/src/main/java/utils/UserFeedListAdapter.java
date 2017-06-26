@@ -3,8 +3,12 @@ package utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,22 +56,27 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
         PostWithImage p = getItem(position);
 
         if (p != null) {
-            TextView tt1 = (TextView) v.findViewById(R.id.id);
-            TextView tt2 = (TextView) v.findViewById(R.id.categoryId);
-            TextView tt3 = (TextView) v.findViewById(R.id.description);
-            ImageView iv1 = (ImageView) v.findViewById(R.id.image);
+            TextView tt1 = (TextView) v.findViewById(R.id.post_user_name);
+            TextView tt2 = (TextView) v.findViewById(R.id.post_caption);
+            TextView tt3 = (TextView) v.findViewById(R.id.post_date_created);
+            ImageView iv1 = (ImageView) v.findViewById(R.id.post_image);
 
             if (tt1 != null) {
-                tt1.setText(p.getPost().getCaption());
+                tt1.setText(p.getPost().getUsername());
             }
 
             if (tt2 != null) {
-                tt2.setText(p.getPost().getDownloadPath());
+                String boldText = p.getPost().getUsername();
+                String normalText = " " + p.getPost().getCaption();
+                SpannableString str = new SpannableString(boldText + normalText);
+                str.setSpan(new StyleSpan(Typeface.BOLD), 0, boldText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                tt2.setText(str);
             }
 
             if (tt3 != null) {
                 tt3.setText(p.getPost().getDateCreated());
             }
+
 
             if (iv1 != null) {
                 iv1.setImageBitmap(p.getImage());

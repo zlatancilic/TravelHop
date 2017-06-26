@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -44,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
-    Button takeImage;
-    Button pickImage;
+    ImageView takeImage;
+    ImageView pickImage;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -62,10 +64,10 @@ public class MainActivity extends AppCompatActivity {
         databaseReference = firebaseDatabase.getReference();
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        final TextView tv = (TextView) findViewById(R.id.text_view);
-        tv.setText(currentUser.getUid());
+//        final TextView tv = (TextView) findViewById(R.id.text_view);
+//        tv.setText(currentUser.getUid());
 
-        Button signOut = (Button) findViewById(R.id.sign_out);
+        ImageView signOut = (ImageView) findViewById(R.id.sign_out);
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        takeImage = (Button) findViewById(R.id.take_image);
+        takeImage = (ImageView) findViewById(R.id.take_image);
         takeImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        pickImage = (Button) findViewById(R.id.pick_image);
+        pickImage = (ImageView) findViewById(R.id.pick_image);
         pickImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                     for(int i = 0; i < followingList.size(); i++) {
                         String tempUser = followingList.get(i).toString();
                         DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
+                        //Query postsQuery = postsReference.orderByChild("date_created");
                         postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
