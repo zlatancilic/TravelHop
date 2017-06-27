@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,7 +19,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,13 +34,10 @@ import models.Post;
 import models.PostWithImage;
 import utils.UserFeedListAdapter;
 
-public class MainActivity extends AppCompatActivity {
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 
-    List<PostWithImage> listOfPosts = new ArrayList<PostWithImage>();
-    FirebaseAuth firebaseAuth;
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
-    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener {
 
     ImageView takeImage;
     ImageView pickImage;
@@ -47,20 +45,14 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
 
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         firebaseAuth = FirebaseAuth.getInstance();
-        firebaseDatabase  = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference();
-
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-//        final TextView tv = (TextView) findViewById(R.id.text_view);
-//        tv.setText(currentUser.getUid());
 
         ImageView signOut = (ImageView) findViewById(R.id.user_profile);
         signOut.setOnClickListener(new View.OnClickListener() {
@@ -90,108 +82,14 @@ public class MainActivity extends AppCompatActivity {
         pickImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_GALLERY_PERMISSION);
+                if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_GALLERY_PERMISSION);
                 }
                 else {
                     startUploadActivity("gallery");
                 }
             }
         });
-
-        ListView yourListView = (ListView) findViewById(R.id.userFeedListView);
-
-        final UserFeedListAdapter customAdapter = new UserFeedListAdapter(this, R.layout.item, listOfPosts);
-
-        customAdapter.setAppContext(getApplicationContext());
-
-        yourListView.setAdapter(customAdapter);
-
-        firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    final Post currentPost = postSnapshot.getValue(Post.class);
-                    final PostWithImage postWithImage = new PostWithImage();
-                    postWithImage.setPost(currentPost);
-                    listOfPosts.add(0, postWithImage);
-                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                        @Override
-                        public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            int index = listOfPosts.indexOf(postWithImage);
-                            listOfPosts.get(index).setImage(bitmap);
-                            customAdapter.notifyDataSetChanged();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-//        DatabaseReference followingList = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/");
-//        followingList.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-//                List followingList = dataSnapshot.getValue(t);
-//                if( followingList == null ) {
-//                    System.out.println("");
-//                }
-//                else {
-//                    for(int i = 0; i < followingList.size(); i++) {
-//                        String tempUser = followingList.get(i).toString();
-//                        DatabaseReference postsReference = firebaseDatabase.getReference("activityStreamPosts/" + tempUser);
-//                        //Query postsQuery = postsReference.orderByChild("date_created");
-//                        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(DataSnapshot dataSnapshot) {
-//                                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-//                                    final Post currentPost = postSnapshot.getValue(Post.class);
-//                                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-//                                    final long ONE_MEGABYTE = 1024 * 1024;
-//                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-//                                        @Override
-//                                        public void onSuccess(byte[] bytes) {
-//                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-//                                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
-//                                            listOfPosts.add(postWithImage);
-//                                            customAdapter.notifyDataSetChanged();
-//                                        }
-//                                    }).addOnFailureListener(new OnFailureListener() {
-//                                        @Override
-//                                        public void onFailure(@NonNull Exception e) {
-//
-//                                        }
-//                                    });
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onCancelled(DatabaseError databaseError) {
-//
-//                            }
-//                        });
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -205,6 +103,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    private void startUploadActivity(String option) {
+        Intent goToImageUploadIntent = new Intent(MainActivity.this, ImageUploadActivity.class);
+        goToImageUploadIntent.putExtra("type", option);
+        startActivityForResult(goToImageUploadIntent, 1);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
@@ -212,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 startUploadActivity("camera");
             }
             else {
-                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
             }
         }
         else if(requestCode == REQUEST_GALLERY_PERMISSION) {
@@ -220,14 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 startUploadActivity("gallery");
             }
             else {
-                Toast.makeText(MainActivity.this, "Permission not granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    private void startUploadActivity(String option) {
-        Intent goToImageUploadIntent = new Intent(MainActivity.this, ImageUploadActivity.class);
-        goToImageUploadIntent.putExtra("type", option);
-        startActivityForResult(goToImageUploadIntent, 1);
     }
 }
