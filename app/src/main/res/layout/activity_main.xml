@@ -54,7 +54,7 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/sign_out"
+                    android:id="@+id/home_user_feed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="13dp"
@@ -70,7 +70,7 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/take_image"
+                    android:id="@+id/pick_image"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="13dp"
@@ -86,7 +86,7 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/pick_image"
+                    android:id="@+id/take_image"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="13dp"

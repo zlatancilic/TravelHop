@@ -62,11 +62,14 @@ public class MainActivity extends AppCompatActivity {
 //        final TextView tv = (TextView) findViewById(R.id.text_view);
 //        tv.setText(currentUser.getUid());
 
-        ImageView signOut = (ImageView) findViewById(R.id.sign_out);
+        ImageView signOut = (ImageView) findViewById(R.id.user_profile);
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 firebaseAuth.signOut();
+                Intent i = new Intent(MainActivity.this, AuthActivity.class);
+                startActivity(i);
+                finish();
             }
         });
 
