@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     final Post currentPost = postSnapshot.getValue(Post.class);
                     final PostWithImage postWithImage = new PostWithImage();
                     postWithImage.setPost(currentPost);
-                    listOfPosts.add(postWithImage);
+                    listOfPosts.add(0, postWithImage);
                     StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
                     final long ONE_MEGABYTE = 1024 * 1024;
                     imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {

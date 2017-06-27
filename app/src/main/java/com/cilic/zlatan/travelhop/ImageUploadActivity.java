@@ -54,7 +54,7 @@ public class ImageUploadActivity extends AppCompatActivity {
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-    private static final SimpleDateFormat creation_date_format = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
+//    private static final SimpleDateFormat creation_date_format = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -211,7 +211,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                     map.put("location", location);
                     map.put("username", currentUser.getUsername());
                     map.put("fullName", currentUser.getFullName());
-                    map.put("dateCreated", creation_date_format.format(timestamp));
+                    map.put("dateCreated", String.valueOf(System.currentTimeMillis() / 1000L));
 
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
