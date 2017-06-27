@@ -41,7 +41,8 @@
                 android:textColor="#707070"
                 android:layout_below="@+id/post_caption"
                 android:id="@+id/post_date_created"
-                android:paddingLeft="10dp"
+                android:textSize="11sp"
+                android:paddingStart="10dp"
                 android:paddingBottom="10dp"/>
 
         </RelativeLayout>

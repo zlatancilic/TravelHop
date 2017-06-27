@@ -75,8 +75,22 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             }
 
             if (tt3 != null) {
-                java.util.Date time=new java.util.Date((long)Integer.valueOf(p.getPost().getDateCreated())*1000);
-                tt3.setText(String.valueOf(time));
+                long diff_number = System.currentTimeMillis() / 1000L - Long.valueOf(p.getPost().getDateCreated());
+                String diff_text = String.valueOf(diff_number) + " SECONDS";
+
+                if(isBetween(diff_number, 61, 3600)) {
+                    diff_text = String.valueOf((diff_number / (60)) % 60) + " MINUTES";
+                }
+                else if(isBetween(diff_number, (long)3601, (long)86400)) {
+                    diff_text = String.valueOf((diff_number / (60*60)) % 24) + " HOURS";
+                }
+                else if(isBetween(diff_number, 86401, 604800)) {
+                    diff_text = String.valueOf(diff_number / (60*60*24)) + " DAYS";
+                }
+                else if(diff_number > 604801) {
+                    diff_text = String.valueOf(diff_number / (60*60*24*7)) + " WEEKS";
+                }
+                tt3.setText(diff_text + " AGO");
             }
 
 
@@ -159,5 +173,9 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
         view.setLayoutParams(params);
 
         Log.i("Test", "done");
+    }
+
+    private boolean isBetween(long a, long lower, long upper) {
+        return a <= upper && a >= lower;
     }
 }
