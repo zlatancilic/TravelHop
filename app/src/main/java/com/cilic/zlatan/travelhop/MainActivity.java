@@ -109,20 +109,22 @@ public class MainActivity extends AppCompatActivity {
 
         yourListView.setAdapter(customAdapter);
 
-        DatabaseReference postsReference = firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid());
-        postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                     final Post currentPost = postSnapshot.getValue(Post.class);
+                    final PostWithImage postWithImage = new PostWithImage();
+                    postWithImage.setPost(currentPost);
+                    listOfPosts.add(postWithImage);
                     StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
                     final long ONE_MEGABYTE = 1024 * 1024;
                     imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
                         public void onSuccess(byte[] bytes) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            PostWithImage postWithImage = new PostWithImage(currentPost, bitmap);
-                            listOfPosts.add(postWithImage);
+                            int index = listOfPosts.indexOf(postWithImage);
+                            listOfPosts.get(index).setImage(bitmap);
                             customAdapter.notifyDataSetChanged();
                         }
                     }).addOnFailureListener(new OnFailureListener() {

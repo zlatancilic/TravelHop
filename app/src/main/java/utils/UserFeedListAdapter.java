@@ -2,6 +2,7 @@ package utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -74,12 +75,17 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             }
 
             if (tt3 != null) {
-                tt3.setText(p.getPost().getDateCreated());
+                java.util.Date time=new java.util.Date((long)Integer.valueOf(p.getPost().getDateCreated())*1000);
+                tt3.setText(String.valueOf(time));
             }
 
 
             if (iv1 != null) {
-                iv1.setImageBitmap(p.getImage());
+                Bitmap tempBitmap = p.getImage();
+                if(tempBitmap == null) {
+                    tempBitmap = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.loading_image);
+                }
+                iv1.setImageBitmap(tempBitmap);
                 scaleImage(iv1);
             }
         }
