@@ -76,19 +76,43 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
 
             if (tt3 != null) {
                 long diff_number = System.currentTimeMillis() / 1000L - Long.valueOf(p.getPost().getDateCreated());
-                String diff_text = String.valueOf(diff_number) + " SECONDS";
+                String seconds_text = " SECOND";
+                if(diff_number > 1) {
+                    seconds_text += "S";
+                }
+                String diff_text = String.valueOf(diff_number) + seconds_text;
 
                 if(isBetween(diff_number, 61, 3600)) {
-                    diff_text = String.valueOf((diff_number / (60)) % 60) + " MINUTES";
+                    long temp_diff = (diff_number / (60)) % 60;
+                    String temp_text = " MINUTE";
+                    if(temp_diff > 1) {
+                        temp_text += "S";
+                    }
+                    diff_text = String.valueOf(temp_diff) + temp_text;
                 }
                 else if(isBetween(diff_number, (long)3601, (long)86400)) {
-                    diff_text = String.valueOf((diff_number / (60*60)) % 24) + " HOURS";
+                    long temp_diff = (diff_number / (60*60)) % 24;
+                    String temp_text = " HOUR";
+                    if(temp_diff > 1) {
+                        temp_text += "S";
+                    }
+                    diff_text = String.valueOf(temp_diff) + temp_text;
                 }
                 else if(isBetween(diff_number, 86401, 604800)) {
-                    diff_text = String.valueOf(diff_number / (60*60*24)) + " DAYS";
+                    long temp_diff = diff_number / (60*60*24);
+                    String temp_text = " DAY";
+                    if(temp_diff > 1) {
+                        temp_text += "S";
+                    }
+                    diff_text = String.valueOf(temp_diff) + temp_text;
                 }
                 else if(diff_number > 604801) {
-                    diff_text = String.valueOf(diff_number / (60*60*24*7)) + " WEEKS";
+                    long temp_diff = diff_number / (60*60*24*7);
+                    String temp_text = " WEEK";
+                    if(temp_diff > 1) {
+                        temp_text += "S";
+                    }
+                    diff_text = String.valueOf(temp_diff) + temp_text;
                 }
                 tt3.setText(diff_text + " AGO");
             }

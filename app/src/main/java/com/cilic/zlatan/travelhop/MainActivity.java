@@ -1,46 +1,24 @@
 package com.cilic.zlatan.travelhop;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import models.Post;
-import models.PostWithImage;
-import utils.UserFeedListAdapter;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-
-public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener, SearchUsers.OnFragmentInteractionListener {
 
     ImageView takeImage;
     ImageView pickImage;
+    ImageView searchUsers;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -51,6 +29,15 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(findViewById(R.id.fragment_container) != null) {
+            if(savedInstanceState != null) {
+                return;
+            }
+
+            UserFeed userFeedFragment = new UserFeed();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, userFeedFragment).commit();
+        }
 
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -88,6 +75,18 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                 else {
                     startUploadActivity("gallery");
                 }
+            }
+        });
+
+        searchUsers = (ImageView) findViewById(R.id.search_users);
+        searchUsers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SearchUsers searchUsersFragment = new SearchUsers();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, searchUsersFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
     }
