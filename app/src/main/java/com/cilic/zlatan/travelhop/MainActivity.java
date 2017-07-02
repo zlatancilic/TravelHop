@@ -2,11 +2,9 @@ package com.cilic.zlatan.travelhop;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.UserDictionary;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -16,17 +14,21 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener, SearchUsers.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener,
+        SearchUsers.OnFragmentInteractionListener,
+        UserProfile.OnFragmentInteractionListener {
 
     ImageView takeImage;
     ImageView pickImage;
     ImageView searchUsers;
     ImageView homeUserFeed;
+    ImageView userProfile;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
     private final String USER_FEED_FRAGMENT_TAG = "HOME_USER_FEED_FRAGMENT";
     private final String SEARCH_USERS_FRAGMENT_TAG = "SEARCH_USERS_FRAGMENT";
+    private final String USER_PROFILE_FRAGMENT_TAG = "USER_PROFILE_FRAGMENT";
 
     FirebaseAuth firebaseAuth;
 
@@ -113,6 +115,24 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     UserFeed userFeedFragment = new UserFeed();
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, userFeedFragment, USER_FEED_FRAGMENT_TAG);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+            }
+        });
+
+        userProfile = (ImageView) findViewById(R.id.user_profile);
+        userProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserProfile userProfileFragment = (UserProfile) getSupportFragmentManager().findFragmentByTag(USER_PROFILE_FRAGMENT_TAG);
+                if(userProfileFragment != null && userProfileFragment.isVisible()) {
+                    //to implement
+                }
+                else {
+                    UserProfile usersProfileFrag = new UserProfile();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }
