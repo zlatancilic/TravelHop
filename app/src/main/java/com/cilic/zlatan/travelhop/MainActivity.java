@@ -2,9 +2,11 @@ package com.cilic.zlatan.travelhop;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.UserDictionary;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +21,12 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     ImageView takeImage;
     ImageView pickImage;
     ImageView searchUsers;
+    ImageView homeUserFeed;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
+    private final String USER_FEED_FRAGMENT_TAG = "HOME_USER_FEED_FRAGMENT";
+    private final String SEARCH_USERS_FRAGMENT_TAG = "SEARCH_USERS_FRAGMENT";
 
     FirebaseAuth firebaseAuth;
 
@@ -36,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
             }
 
             UserFeed userFeedFragment = new UserFeed();
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, userFeedFragment).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, userFeedFragment, USER_FEED_FRAGMENT_TAG).commit();
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -82,13 +87,38 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
         searchUsers.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SearchUsers searchUsersFragment = new SearchUsers();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, searchUsersFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                SearchUsers searchUsers = (SearchUsers) getSupportFragmentManager().findFragmentByTag(SEARCH_USERS_FRAGMENT_TAG);
+                if(searchUsers != null && searchUsers.isVisible()) {
+                    //to implement
+                }
+                else {
+                    SearchUsers searchUsersFragment = new SearchUsers();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, searchUsersFragment, SEARCH_USERS_FRAGMENT_TAG);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
             }
         });
+
+        homeUserFeed = (ImageView) findViewById(R.id.home_user_feed);
+        homeUserFeed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserFeed userFeed = (UserFeed) getSupportFragmentManager().findFragmentByTag(USER_FEED_FRAGMENT_TAG);
+                if(userFeed != null && userFeed.isVisible()) {
+                    userFeed.scrollToTop();
+                }
+                else {
+                    UserFeed userFeedFragment = new UserFeed();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, userFeedFragment, USER_FEED_FRAGMENT_TAG);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+            }
+        });
+
     }
 
     @Override

@@ -56,6 +56,7 @@ public class UserFeed extends Fragment {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+    ListView userFeedListView;
 
     public UserFeed() {
         // Required empty public constructor
@@ -98,13 +99,13 @@ public class UserFeed extends Fragment {
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
-        ListView yourListView = (ListView) fragmentView.findViewById(R.id.userFeedListView);
+        userFeedListView = (ListView) fragmentView.findViewById(R.id.userFeedListView);
 
         final UserFeedListAdapter customAdapter = new UserFeedListAdapter(fragmentView.getContext(), R.layout.item, listOfPosts);
 
         customAdapter.setAppContext(getActivity().getApplicationContext());
 
-        yourListView.setAdapter(customAdapter);
+        userFeedListView.setAdapter(customAdapter);
 
         firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -180,5 +181,10 @@ public class UserFeed extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void scrollToTop() {
+        //userFeedListView.setSelectionAfterHeaderView();
+        userFeedListView.smoothScrollToPosition(0);
     }
 }
