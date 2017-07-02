@@ -7,6 +7,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import models.UserDetails;
+import models.UserWithImage;
+import utils.UserSearchListAdapter;
 
 
 /**
@@ -28,6 +36,9 @@ public class SearchUsers extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    ListView userListView;
+    List<UserWithImage> listOfUsers = new ArrayList<UserWithImage>();
 
     public SearchUsers() {
         // Required empty public constructor
@@ -64,7 +75,27 @@ public class SearchUsers extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search_users, container, false);
+        View userListFragmentView = inflater.inflate(R.layout.fragment_search_users, container, false);
+
+        userListView = (ListView) userListFragmentView.findViewById(R.id.user_list_search);
+
+        final UserSearchListAdapter customAdapter = new UserSearchListAdapter(userListFragmentView.getContext(), R.layout.item, listOfUsers);
+
+        customAdapter.setAppContext(getActivity().getApplicationContext());
+
+        userListView.setAdapter(customAdapter);
+
+        for (int i = 0; i < 6; i++) {
+            UserDetails userDetails = new UserDetails("Ime Prezime", "imeprezime");
+            UserWithImage userWithImage = new UserWithImage();
+            userWithImage.setUserDetails(userDetails);
+
+            listOfUsers.add(userWithImage);
+        }
+
+        customAdapter.notifyDataSetChanged();
+
+        return  userListFragmentView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
