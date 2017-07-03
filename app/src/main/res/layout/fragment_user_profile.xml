@@ -5,10 +5,24 @@
     tools:context="com.cilic.zlatan.travelhop.UserProfile">
 
     <!-- TODO: Update blank fragment layout -->
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/edit_profile"
-        android:text="@string/edit_profile"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/edit_profile"
+            android:text="@string/edit_profile"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sign_out"
+            android:text="@string/sign_out"
+            android:layout_below="@+id/edit_profile"/>
+
+    </RelativeLayout>
+
 
 </FrameLayout>

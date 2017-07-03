@@ -81,11 +81,17 @@ public class UserSearchListAdapter extends ArrayAdapter<UserWithImage>{
 
 
             if (iv1 != null) {
-                Bitmap icon = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.default_user_avatar);
+                Bitmap icon = p.getImage();
+                if(icon == null) {
+                    icon = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.default_user_avatar);
+                }
+                icon = Bitmap.createScaledBitmap(icon, 500, 500, false);
                 RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(applicationContext.getResources(), icon);
                 final float roundPx = (float) icon.getWidth() * 0.6f;
                 roundedBitmapDrawable.setCornerRadius(roundPx);
                 iv1.setImageDrawable(roundedBitmapDrawable);
+
+
             }
         }
 

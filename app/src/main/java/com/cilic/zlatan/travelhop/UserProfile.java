@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +34,7 @@ public class UserProfile extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     Button editProfile;
+    FirebaseAuth firebaseAuth;
 
     public UserProfile() {
         // Required empty public constructor
@@ -70,12 +73,25 @@ public class UserProfile extends Fragment {
         // Inflate the layout for this fragment
         View profileFragment = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+
         editProfile = (Button) profileFragment.findViewById(R.id.edit_profile);
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), EditProfileActivity.class);
                 startActivity(i);
+            }
+        });
+
+        Button signOut = (Button) profileFragment.findViewById(R.id.sign_out);
+        signOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                firebaseAuth.signOut();
+                Intent i = new Intent(getActivity(), AuthActivity.class);
+                startActivity(i);
+                getActivity().finish();
             }
         });
 

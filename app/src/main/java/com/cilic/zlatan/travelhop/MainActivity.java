@@ -48,17 +48,6 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        ImageView signOut = (ImageView) findViewById(R.id.user_profile);
-        signOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                firebaseAuth.signOut();
-                Intent i = new Intent(MainActivity.this, AuthActivity.class);
-                startActivity(i);
-                finish();
-            }
-        });
-
         takeImage = (ImageView) findViewById(R.id.take_image);
         takeImage.setOnClickListener(new View.OnClickListener() {
             @Override

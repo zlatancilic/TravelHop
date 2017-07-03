@@ -1,17 +1,33 @@
 package com.cilic.zlatan.travelhop;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import models.Post;
+import models.PostWithImage;
 import models.UserDetails;
 import models.UserWithImage;
 import utils.UserSearchListAdapter;
@@ -39,6 +55,11 @@ public class SearchUsers extends Fragment {
 
     ListView userListView;
     List<UserWithImage> listOfUsers = new ArrayList<UserWithImage>();
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+    private FirebaseAuth firebaseAuth;
 
     public SearchUsers() {
         // Required empty public constructor
@@ -85,15 +106,53 @@ public class SearchUsers extends Fragment {
 
         userListView.setAdapter(customAdapter);
 
-        for (int i = 0; i < 6; i++) {
-            UserDetails userDetails = new UserDetails("Ime Prezime", "imeprezime");
-            UserWithImage userWithImage = new UserWithImage();
-            userWithImage.setUserDetails(userDetails);
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
 
-            listOfUsers.add(userWithImage);
-        }
+        firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
+                    final UserWithImage userWithImage = new UserWithImage();
+                    userWithImage.setUserDetails(currentUserDetails);
 
-        customAdapter.notifyDataSetChanged();
+                    listOfUsers.add(0, userWithImage);
+                    StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
+                    final long ONE_MEGABYTE = 1024 * 1024;
+                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            int index = listOfUsers.indexOf(userWithImage);
+                            listOfUsers.get(index).setImage(bitmap);
+                            customAdapter.notifyDataSetChanged();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+//        for (int i = 0; i < 6; i++) {
+//            UserDetails userDetails = new UserDetails("Ime Prezime", "imeprezime");
+//            UserWithImage userWithImage = new UserWithImage();
+//            userWithImage.setUserDetails(userDetails);
+//
+//            listOfUsers.add(userWithImage);
+//        }
+//
+//        customAdapter.notifyDataSetChanged();
 
         return  userListFragmentView;
     }

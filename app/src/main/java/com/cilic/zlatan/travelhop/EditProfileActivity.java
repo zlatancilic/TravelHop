@@ -185,6 +185,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void setImage(Bitmap bitmapImage) {
         bitmapImage = cropToSquare(bitmapImage);
+        bitmapImage = Bitmap.createScaledBitmap(bitmapImage, 120, 120, false);
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmapImage);
         final float roundPx = (float) bitmapImage.getWidth() * 0.6f;
         roundedBitmapDrawable.setCornerRadius(roundPx);
