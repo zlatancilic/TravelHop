@@ -37,6 +37,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="6"
                 android:hint="@string/search_users_input"
+                android:id="@+id/search_users_edit_text"
                 android:background="@drawable/blank_edit_text_back"/>
 
 

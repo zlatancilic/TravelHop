@@ -7,10 +7,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,6 +36,7 @@ import models.Post;
 import models.PostWithImage;
 import models.UserDetails;
 import models.UserWithImage;
+import utils.SearchUsersListAdapter;
 import utils.UserSearchListAdapter;
 
 
@@ -57,12 +61,13 @@ public class SearchUsers extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     ListView userListView;
-    List<UserWithImage> listOfUsers = new ArrayList<UserWithImage>();
+    ArrayList<UserWithImage> listOfUsers = new ArrayList<UserWithImage>();
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     private FirebaseAuth firebaseAuth;
+    EditText searchEditText;
 
     public SearchUsers() {
         // Required empty public constructor
@@ -103,11 +108,31 @@ public class SearchUsers extends Fragment {
 
         userListView = (ListView) userListFragmentView.findViewById(R.id.user_list_search);
 
-        final UserSearchListAdapter customAdapter = new UserSearchListAdapter(userListFragmentView.getContext(), R.layout.item, listOfUsers);
+        final SearchUsersListAdapter cAdapter = new SearchUsersListAdapter(userListFragmentView.getContext(), listOfUsers);
 
-        customAdapter.setAppContext(getActivity().getApplicationContext());
+//        final UserSearchListAdapter customAdapter = new UserSearchListAdapter(userListFragmentView.getContext(), R.layout.item, listOfUsers);
+//
+//        customAdapter.setAppContext(getActivity().getApplicationContext());
 
-        userListView.setAdapter(customAdapter);
+        userListView.setAdapter(cAdapter);
+
+        searchEditText = (EditText) userListFragmentView.findViewById(R.id.search_users_edit_text);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                cAdapter.getFilter().filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDatabase  = FirebaseDatabase.getInstance();
@@ -147,7 +172,7 @@ public class SearchUsers extends Fragment {
                                             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                                             int index = listOfUsers.indexOf(userWithImage);
                                             listOfUsers.get(index).setImage(bitmap);
-                                            customAdapter.notifyDataSetChanged();
+                                            cAdapter.notifyDataSetChanged();
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override
