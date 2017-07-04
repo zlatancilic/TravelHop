@@ -6,6 +6,7 @@ public class UserWithImage {
 
     private UserDetails userDetails;
     private Bitmap image;
+    private String followingStatus;
 
     public UserWithImage() {}
 
@@ -28,5 +29,13 @@ public class UserWithImage {
 
     public void setImage(Bitmap image) {
         this.image = image;
+    }
+
+    public String getFollowingStatus() {
+        return followingStatus;
+    }
+
+    public void setFollowingStatus(String followingStatus) {
+        this.followingStatus = followingStatus;
     }
 }

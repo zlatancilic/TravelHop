@@ -7,10 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -19,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -110,28 +113,54 @@ public class SearchUsers extends Fragment {
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
-        firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
+        final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/";
+        DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
+        System.out.println(followers_img_path);
+        followersList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
-                    final UserWithImage userWithImage = new UserWithImage();
-                    userWithImage.setUserDetails(currentUserDetails);
+                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                final List followersList = dataSnapshot.getValue(t);
+                if( followersList == null ) {
 
-                    listOfUsers.add(0, userWithImage);
-                    StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                }
+                else {
+                    firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            int index = listOfUsers.indexOf(userWithImage);
-                            listOfUsers.get(index).setImage(bitmap);
-                            customAdapter.notifyDataSetChanged();
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                if(!firebaseAuth.getCurrentUser().getUid().equals(postSnapshot.getKey())) {
+                                    final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
+                                    final UserWithImage userWithImage = new UserWithImage();
+                                    userWithImage.setUserDetails(currentUserDetails);
+                                    if (followersList.contains(postSnapshot.getKey())) {
+                                        userWithImage.setFollowingStatus("Following");
+                                    } else {
+                                        userWithImage.setFollowingStatus("Not following");
+                                    }
+                                    listOfUsers.add(0, userWithImage);
+                                    StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
+                                    final long ONE_MEGABYTE = 1024 * 1024;
+                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                            int index = listOfUsers.indexOf(userWithImage);
+                                            listOfUsers.get(index).setImage(bitmap);
+                                            customAdapter.notifyDataSetChanged();
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                        }
+                                    });
+                                }
+                            }
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
+
                         @Override
-                        public void onFailure(@NonNull Exception e) {
+                        public void onCancelled(DatabaseError databaseError) {
 
                         }
                     });
@@ -144,15 +173,7 @@ public class SearchUsers extends Fragment {
             }
         });
 
-//        for (int i = 0; i < 6; i++) {
-//            UserDetails userDetails = new UserDetails("Ime Prezime", "imeprezime");
-//            UserWithImage userWithImage = new UserWithImage();
-//            userWithImage.setUserDetails(userDetails);
-//
-//            listOfUsers.add(userWithImage);
-//        }
-//
-//        customAdapter.notifyDataSetChanged();
+
 
         return  userListFragmentView;
     }

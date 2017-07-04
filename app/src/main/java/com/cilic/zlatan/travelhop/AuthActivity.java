@@ -2,9 +2,12 @@ package com.cilic.zlatan.travelhop;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -23,13 +26,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +73,7 @@ public class AuthActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
+    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
     private final String TAG = AuthActivity.class.getName();
 
@@ -374,12 +384,36 @@ public class AuthActivity extends AppCompatActivity {
 
                         if(task.isSuccessful()) {
                             Log.i(TAG, "User creation success!");
-                            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                            final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                             Map<String, String> map = new HashMap<String, String>();
                             map.put("fullName", fullName);
                             map.put("username", username);
-                            databaseReference.child("userDetails").child(currentUser.getUid()).setValue(map);
-                            updateUI(currentUser);
+                            databaseReference.child("userDetails").child(currentUser.getUid()).setValue(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Bitmap imageForUpload = BitmapFactory.decodeResource(getResources(), R.drawable.default_user_avatar);
+                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    imageForUpload.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                    byte[] data = baos.toByteArray();
+                                    final String img_path = "userProfileImages/" + currentUser.getUid();
+
+                                    StorageReference imageRef = storageReference.child(img_path);
+                                    UploadTask uploadTask = imageRef.putBytes(data);
+                                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            updateUI(currentUser);
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                        }
+                                    });
+                                }
+                            });
+
+
                         }
                         if (!task.isSuccessful()) {
                             Toast.makeText(AuthActivity.this, "Sign Up failed - try again later",
