@@ -111,9 +111,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
         final UserFeedListAdapter customAdapter = new UserFeedListAdapter(fragmentView.getContext(), R.layout.item, listOfPosts);
 
         customAdapter.setAppContext(getActivity().getApplicationContext());
-
         
-
         userFeedListView.setAdapter(customAdapter);
 
         userFeedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -135,39 +133,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
             }
         });
 
-        firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    final Post currentPost = postSnapshot.getValue(Post.class);
-                    final PostWithImage postWithImage = new PostWithImage();
-                    postWithImage.setPost(currentPost);
-                    listOfPosts.add(0, postWithImage);
-                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                        @Override
-                        public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            int index = listOfPosts.indexOf(postWithImage);
-                            listOfPosts.get(index).setImage(bitmap);
-                            customAdapter.notifyDataSetChanged();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+        loadData();
 
         return fragmentView;
     }
@@ -177,6 +143,10 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     @Override
     public void onRefresh() {
         listOfPosts.clear();
+        loadData();
+    }
+
+    private void loadData() {
         final UserFeedListAdapter customAdapter = (UserFeedListAdapter) userFeedListView.getAdapter();
         firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -195,10 +165,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                             int index = listOfPosts.indexOf(postWithImage);
                             listOfPosts.get(index).setImage(bitmap);
                             customAdapter.notifyDataSetChanged();
-                            Log.i("POSTS SIZE: ", String.valueOf(listOfPosts.size()));
-                            Log.i("CHILDREN SIZE: ",String.valueOf(dataSnapshot.getChildrenCount()));
                             if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
-                                System.out.println("SKOLA123");
                                 boolean allImagesSet = true;
                                 for(PostWithImage post: listOfPosts) {
                                     if(post.getImage() == null) {
