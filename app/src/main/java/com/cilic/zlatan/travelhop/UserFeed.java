@@ -111,7 +111,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
         final UserFeedListAdapter customAdapter = new UserFeedListAdapter(fragmentView.getContext(), R.layout.item, listOfPosts);
 
         customAdapter.setAppContext(getActivity().getApplicationContext());
-        
+
         userFeedListView.setAdapter(customAdapter);
 
         userFeedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
