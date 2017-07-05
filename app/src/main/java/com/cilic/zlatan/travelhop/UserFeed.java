@@ -7,9 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -39,7 +42,7 @@ import utils.UserFeedListAdapter;
  * Use the {@link UserFeed#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UserFeed extends Fragment {
+public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -57,6 +60,7 @@ public class UserFeed extends Fragment {
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     ListView userFeedListView;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     public UserFeed() {
         // Required empty public constructor
@@ -99,13 +103,37 @@ public class UserFeed extends Fragment {
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
+        swipeRefreshLayout = (SwipeRefreshLayout) fragmentView.findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
         userFeedListView = (ListView) fragmentView.findViewById(R.id.userFeedListView);
 
         final UserFeedListAdapter customAdapter = new UserFeedListAdapter(fragmentView.getContext(), R.layout.item, listOfPosts);
 
         customAdapter.setAppContext(getActivity().getApplicationContext());
 
+        
+
         userFeedListView.setAdapter(customAdapter);
+
+        userFeedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                boolean enabled = false;
+                if(userFeedListView != null && userFeedListView.getChildCount() > 0) {
+                    boolean firstItemVisible = userFeedListView.getFirstVisiblePosition() == 0;
+                    boolean topOfFirstItemVisible = userFeedListView.getChildAt(0).getTop() == 0;
+                    enabled = firstItemVisible && topOfFirstItemVisible;
+                }
+                swipeRefreshLayout.setEnabled(enabled);
+
+            }
+        });
 
         firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -142,6 +170,61 @@ public class UserFeed extends Fragment {
 
 
         return fragmentView;
+    }
+
+
+
+    @Override
+    public void onRefresh() {
+        listOfPosts.clear();
+        final UserFeedListAdapter customAdapter = (UserFeedListAdapter) userFeedListView.getAdapter();
+        firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    final Post currentPost = postSnapshot.getValue(Post.class);
+                    final PostWithImage postWithImage = new PostWithImage();
+                    postWithImage.setPost(currentPost);
+                    listOfPosts.add(0, postWithImage);
+                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+                    final long ONE_MEGABYTE = 1024 * 1024;
+                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            int index = listOfPosts.indexOf(postWithImage);
+                            listOfPosts.get(index).setImage(bitmap);
+                            customAdapter.notifyDataSetChanged();
+                            Log.i("POSTS SIZE: ", String.valueOf(listOfPosts.size()));
+                            Log.i("CHILDREN SIZE: ",String.valueOf(dataSnapshot.getChildrenCount()));
+                            if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
+                                System.out.println("SKOLA123");
+                                boolean allImagesSet = true;
+                                for(PostWithImage post: listOfPosts) {
+                                    if(post.getImage() == null) {
+                                        allImagesSet = false;
+                                        break;
+                                    }
+                                }
+                                if(allImagesSet) {
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
