@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,10 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     ImageView searchUsers;
     ImageView homeUserFeed;
     ImageView userProfile;
+
+    RelativeLayout homeButtonContainer;
+    RelativeLayout searchButtonContainer;
+    RelativeLayout profileButtonContainer;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -74,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
             }
         });
 
+        searchButtonContainer = (RelativeLayout) findViewById(R.id.search_button_container);
         searchUsers = (ImageView) findViewById(R.id.search_users);
         searchUsers.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,10 +94,14 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     transaction.replace(R.id.fragment_container, searchUsersFragment, SEARCH_USERS_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
                     transaction.commit();
+                    profileButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
+                    homeButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
+                    searchButtonContainer.setBackgroundColor(getResources().getColor(R.color.lightGray));
                 }
             }
         });
 
+        homeButtonContainer = (RelativeLayout) findViewById(R.id.home_button_container);
         homeUserFeed = (ImageView) findViewById(R.id.home_user_feed);
         homeUserFeed.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,10 +116,14 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     transaction.replace(R.id.fragment_container, userFeedFragment, USER_FEED_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
                     transaction.commit();
+                    profileButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
+                    homeButtonContainer.setBackgroundColor(getResources().getColor(R.color.lightGray));
+                    searchButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
                 }
             }
         });
 
+        profileButtonContainer = (RelativeLayout) findViewById(R.id.profile_button_container);
         userProfile = (ImageView) findViewById(R.id.user_profile);
         userProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
                     transaction.commit();
+                    profileButtonContainer.setBackgroundColor(getResources().getColor(R.color.lightGray));
+                    homeButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
+                    searchButtonContainer.setBackgroundColor(getResources().getColor(R.color.defaultBackgroundLight));
                 }
             }
         });
