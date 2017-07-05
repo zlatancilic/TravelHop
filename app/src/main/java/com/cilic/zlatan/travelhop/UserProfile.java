@@ -1,16 +1,21 @@
 package com.cilic.zlatan.travelhop;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.w3c.dom.Text;
 
 
 /**
@@ -84,14 +89,29 @@ public class UserProfile extends Fragment {
             }
         });
 
-        Button signOut = (Button) profileFragment.findViewById(R.id.sign_out);
+        TextView signOut = (TextView) profileFragment.findViewById(R.id.sign_out);
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                firebaseAuth.signOut();
-                Intent i = new Intent(getActivity(), AuthActivity.class);
-                startActivity(i);
-                getActivity().finish();
+
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("SIGN OUT")
+                        .setIcon(R.drawable.ic_exit_to_app_black_24dp)
+                        .setMessage("Do you really want to sign out?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                firebaseAuth.signOut();
+                                Intent i = new Intent(getActivity(), AuthActivity.class);
+                                startActivity(i);
+                                getActivity().finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+
+
             }
         });
 
