@@ -96,7 +96,6 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_user_feed, container, false);
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -105,6 +104,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
 
         swipeRefreshLayout = (SwipeRefreshLayout) fragmentView.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setProgressViewOffset(true, 25, 230);
 
         userFeedListView = (ListView) fragmentView.findViewById(R.id.userFeedListView);
 
