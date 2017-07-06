@@ -1,7 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/swipe_container_user_profile"
     tools:context="com.cilic.zlatan.travelhop.UserProfile">
 
     <!-- TODO: Update blank fragment layout -->
@@ -43,18 +44,112 @@
             android:layout_weight="0.001"
             android:background="@android:color/darker_gray" />
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:id="@+id/scroll_view_container"
             android:layout_weight="0.906">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/edit_profile"
-                android:text="@string/edit_profile"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-        </RelativeLayout>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile1"
+                    android:layout_below="@+id/edit_profile"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile2"
+                    android:layout_below="@+id/edit_profile1"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile3"
+                    android:layout_below="@+id/edit_profile2"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile4"
+                    android:layout_below="@+id/edit_profile3"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile5"
+                    android:layout_below="@+id/edit_profile4"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile6"
+                    android:layout_below="@+id/edit_profile5"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile7"
+                    android:layout_below="@+id/edit_profile6"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile8"
+                    android:layout_below="@+id/edit_profile7"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile9"
+                    android:layout_below="@+id/edit_profile8"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile10"
+                    android:layout_below="@+id/edit_profile9"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile11"
+                    android:layout_below="@+id/edit_profile10"
+                    android:text="@string/edit_profile"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/edit_profile12"
+                    android:layout_below="@+id/edit_profile11"
+                    android:text="@string/edit_profile"/>
+
+
+            </RelativeLayout>
+
+        </ScrollView>
+
+
 
 
     </LinearLayout>
@@ -62,4 +157,4 @@
 
 
 
-</FrameLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

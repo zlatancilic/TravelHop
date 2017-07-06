@@ -7,10 +7,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.app.AlertDialog;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,7 +29,7 @@ import org.w3c.dom.Text;
  * Use the {@link UserProfile#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UserProfile extends Fragment {
+public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -40,6 +43,8 @@ public class UserProfile extends Fragment {
 
     Button editProfile;
     FirebaseAuth firebaseAuth;
+    SwipeRefreshLayout swipeRefreshLayout;
+    ScrollView scrollView;
 
     public UserProfile() {
         // Required empty public constructor
@@ -80,6 +85,24 @@ public class UserProfile extends Fragment {
 
         firebaseAuth = FirebaseAuth.getInstance();
 
+        swipeRefreshLayout = (SwipeRefreshLayout) profileFragment.findViewById(R.id.swipe_container_user_profile);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setProgressViewOffset(true, 25, 230);
+
+        scrollView = (ScrollView) profileFragment.findViewById(R.id.scroll_view_container);
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+            @Override
+            public void onScrollChanged() {
+                int scrollPosition = scrollView.getScrollY();
+                if(scrollPosition == 0) {
+                    swipeRefreshLayout.setEnabled(true);
+                }
+                else {
+                    swipeRefreshLayout.setEnabled(false);
+                }
+            }
+        });
+
         editProfile = (Button) profileFragment.findViewById(R.id.edit_profile);
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,6 +139,12 @@ public class UserProfile extends Fragment {
         });
 
         return profileFragment;
+    }
+
+    @Override
+    public void onRefresh() {
+        editProfile.setText("AAAAAA");
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
