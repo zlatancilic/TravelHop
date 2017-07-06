@@ -3,22 +3,32 @@ package com.cilic.zlatan.travelhop;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.app.AlertDialog;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.w3c.dom.Text;
+
+import utils.ExpandableGridView;
+import utils.GridImageAdapter;
 
 
 /**
@@ -45,6 +55,15 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     FirebaseAuth firebaseAuth;
     SwipeRefreshLayout swipeRefreshLayout;
     ScrollView scrollView;
+    ImageView userAvatarImageView;
+
+    private Integer[] dataImages = {R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar };
+
 
     public UserProfile() {
         // Required empty public constructor
@@ -88,6 +107,23 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         swipeRefreshLayout = (SwipeRefreshLayout) profileFragment.findViewById(R.id.swipe_container_user_profile);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setProgressViewOffset(true, 25, 230);
+
+        ExpandableGridView gw = (ExpandableGridView) profileFragment.findViewById(R.id.grid_view);
+        gw.setExpanded(true);
+        gw.setAdapter(new GridImageAdapter(getContext(), dataImages));
+
+//        gw.setOnTouchListener(new View.OnTouchListener(){
+//
+//
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return event.getAction() == MotionEvent.ACTION_MOVE;
+//            }
+//        });
+
+        userAvatarImageView = (ImageView) profileFragment.findViewById(R.id.user_profile_avatar);
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.default_user_avatar);
+        setImage(icon);
 
         scrollView = (ScrollView) profileFragment.findViewById(R.id.scroll_view_container);
         scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
@@ -169,6 +205,14 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private void setImage(Bitmap bitmapImage) {
+        bitmapImage = Bitmap.createScaledBitmap(bitmapImage, 420, 420, false);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmapImage);
+        final float roundPx = (float) bitmapImage.getWidth() * 0.6f;
+        roundedBitmapDrawable.setCornerRadius(roundPx);
+        userAvatarImageView.setImageDrawable(roundedBitmapDrawable);
     }
 
     /**

@@ -52,98 +52,95 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
-                <Button
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile"
-                    android:text="@string/edit_profile"/>
+                    android:layout_gravity="start"
+                    android:adjustViewBounds="true"
+                    android:padding="5dp"
+                    android:layout_margin="11dp"
+                    android:id="@+id/user_profile_avatar"
+                    android:src="@drawable/default_user_avatar"/>
 
-                <Button
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile1"
-                    android:layout_below="@+id/edit_profile"
-                    android:text="@string/edit_profile"/>
+                    android:layout_toEndOf="@+id/user_profile_avatar"
+                    android:id="@+id/followers_options_container">
 
-                <Button
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/posts_count"
+                        android:text="95"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp"
+                        android:textSize="20sp"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/followers_count"
+                        android:text="95"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp"
+                        android:textSize="20sp"
+                        android:layout_toEndOf="@+id/posts_count"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/following_count"
+                        android:text="95"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp"
+                        android:textSize="20sp"
+                        android:layout_toEndOf="@id/followers_count"/>
+
+
+                    <Button
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/edit_profile"
+                        android:text="@string/edit_profile"
+                        android:layout_margin="14dp"
+                        android:layout_below="@+id/posts_count"/>
+
+
+                </RelativeLayout>
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile2"
-                    android:layout_below="@+id/edit_profile1"
-                    android:text="@string/edit_profile"/>
+                    android:layout_below="@+id/user_profile_avatar"
+                    android:textSize="17sp"
+                    android:paddingStart="5dp"
+                    android:layout_marginStart="11dp"
+                    android:layout_marginBottom="11dp"
+                    android:textStyle="bold"
+                    android:id="@+id/user_profile_name"
+                    android:text="Example Name"/>
 
-                <Button
+                <utils.ExpandableGridView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile3"
-                    android:layout_below="@+id/edit_profile2"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile4"
-                    android:layout_below="@+id/edit_profile3"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile5"
-                    android:layout_below="@+id/edit_profile4"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile6"
-                    android:layout_below="@+id/edit_profile5"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile7"
-                    android:layout_below="@+id/edit_profile6"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile8"
-                    android:layout_below="@+id/edit_profile7"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile9"
-                    android:layout_below="@+id/edit_profile8"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile10"
-                    android:layout_below="@+id/edit_profile9"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile11"
-                    android:layout_below="@+id/edit_profile10"
-                    android:text="@string/edit_profile"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/edit_profile12"
-                    android:layout_below="@+id/edit_profile11"
-                    android:text="@string/edit_profile"/>
-
+                    android:layout_below="@+id/user_profile_name"
+                    android:isScrollContainer="false"
+                    android:numColumns="auto_fit"
+                    android:columnWidth="90dp"
+                    android:stretchMode="columnWidth"
+                    android:id="@+id/grid_view"/>
 
             </RelativeLayout>
 
