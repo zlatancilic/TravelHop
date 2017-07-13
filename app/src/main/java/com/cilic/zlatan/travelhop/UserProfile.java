@@ -62,7 +62,10 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             R.drawable.default_user_avatar, R.drawable.default_user_avatar,
             R.drawable.default_user_avatar, R.drawable.default_user_avatar,
             R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar };
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
+            R.drawable.default_user_avatar, R.drawable.default_user_avatar};
 
 
     public UserProfile() {
