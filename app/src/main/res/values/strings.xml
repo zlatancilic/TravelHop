@@ -14,6 +14,7 @@
     <string name="sign_out">Sign Out</string>
     <string name="change_profile_picture">Change photo</string>
     <string name="search_users_input">Search</string>
+    <string name="sign_out_all_caps">SIGN OUT</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

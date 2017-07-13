@@ -140,7 +140,6 @@ public class SearchUsers extends Fragment {
 
         final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/";
         DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
-        System.out.println(followers_img_path);
         followersList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

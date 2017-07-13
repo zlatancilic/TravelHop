@@ -13,6 +13,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,11 +35,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import models.Post;
 import models.PostWithImage;
+import models.UserDetails;
 import utils.ExpandableGridView;
 import utils.GridImageAdapter;
 
@@ -67,22 +72,17 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     ScrollView scrollView;
     ImageView userAvatarImageView;
     ExpandableGridView gw;
+    TextView postsCountTextView;
+    TextView followersCountTextView;
+    TextView followingCountTextView;
+    TextView usernameHeaderTextView;
+    TextView userProfileNameTextView;
+
     FirebaseAuth firebaseAuth;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     List<PostWithImage> listOfPosts = new ArrayList<PostWithImage>();
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-
-    private Integer[] dataImages = {R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar,
-            R.drawable.default_user_avatar, R.drawable.default_user_avatar};
-
 
     public UserProfile() {
         // Required empty public constructor
@@ -132,6 +132,12 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         gw = (ExpandableGridView) profileFragment.findViewById(R.id.grid_view);
         gw.setExpanded(true);
         gw.setAdapter(new GridImageAdapter(getContext(), listOfPosts));
+
+        postsCountTextView = (TextView) profileFragment.findViewById(R.id.posts_count);
+        followersCountTextView = (TextView) profileFragment.findViewById(R.id.followers_count);
+        followingCountTextView = (TextView) profileFragment.findViewById(R.id.following_count);
+        usernameHeaderTextView = (TextView) profileFragment.findViewById(R.id.username_header);
+        userProfileNameTextView = (TextView) profileFragment.findViewById(R.id.user_profile_name);
 
 //        gw.setOnTouchListener(new View.OnTouchListener(){
 //
@@ -201,6 +207,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     private void loadData() {
+        //****************** POPULATE USER POSTS GRID AND COUNT **************//
         final GridImageAdapter customAdapter = (GridImageAdapter) gw.getAdapter();
         customAdapter.clearData();
         firebaseDatabase.getReference("activityStreamPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -221,7 +228,11 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                             listOfPosts.get(index).setImage(bitmap);
                             customAdapter.addElements(listOfPosts);
                             if(customAdapter.checkAllDataSet((int)dataSnapshot.getChildrenCount())) {
+                                String numberOfPosts = String.valueOf(dataSnapshot.getChildrenCount());
+                                String additionalText = "\nPOSTS";
+                                setCountText(numberOfPosts, additionalText, postsCountTextView);
                                 swipeRefreshLayout.setRefreshing(false);
+
                             }
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -238,6 +249,72 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
             }
         });
+
+        //****************** POPULATE USER NAME AND USERNAME **************//
+        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                final UserDetails currentUserDetails = dataSnapshot.getValue(UserDetails.class);
+                usernameHeaderTextView.setText(currentUserDetails.getUsername());
+                userProfileNameTextView.setText(currentUserDetails.getFullName());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //****************** POPULATE USER FOLLOWING COUNT **************//
+        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    String numberOfPosts = String.valueOf(dataSnapshot.getChildrenCount());
+                    String additionalText = "\nFOLLOWING";
+                    setCountText(numberOfPosts, additionalText, followingCountTextView);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //****************** POPULATE USER FOLLOWERS COUNT **************//
+        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/followers").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    String numberOfPosts = String.valueOf(dataSnapshot.getChildrenCount());
+                    String additionalText = "\nFOLLOWERS";
+                    setCountText(numberOfPosts, additionalText, followersCountTextView);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //***************** POPULATE USER PROFILE PICTURE *****************//
+        StorageReference imageReference = storageReference.child("userProfileImages/" + firebaseAuth.getCurrentUser().getUid());
+        final long ONE_MEGABYTE = 1024 * 1024;
+        imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                setImage(bitmap);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+
     }
 
     @Override
@@ -250,6 +327,15 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    private void setCountText(String countText, String additionalText, TextView textView) {
+        int offset = countText.length() + 1;
+        int additionalOffset = additionalText.length() - 1;
+        String postsCountString = countText + additionalText;
+        SpannableString spannableString=  new SpannableString(postsCountString);
+        spannableString.setSpan(new RelativeSizeSpan(0.5f), offset, offset + additionalOffset,0);
+        textView.setText(spannableString);
     }
 
     @Override
