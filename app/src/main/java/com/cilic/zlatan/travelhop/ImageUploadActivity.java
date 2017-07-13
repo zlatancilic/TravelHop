@@ -54,7 +54,6 @@ public class ImageUploadActivity extends AppCompatActivity {
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-//    private static final SimpleDateFormat creation_date_format = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -190,6 +189,9 @@ public class ImageUploadActivity extends AppCompatActivity {
         final String caption = captionEditText.getText().toString();
         final String location = locationEditText.getText().toString();
 
+        Bitmap thumbnailImage = EditProfileActivity.cropToSquare(image);
+        final Bitmap thumbnailForUpload = Bitmap.createScaledBitmap(thumbnailImage, 120, 120, false);
+
         DatabaseReference postsReference = firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid());
         postsReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -199,11 +201,21 @@ public class ImageUploadActivity extends AppCompatActivity {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     byte[] data = baos.toByteArray();
+
+                    ByteArrayOutputStream baosThumb = new ByteArrayOutputStream();
+                    thumbnailForUpload.compress(Bitmap.CompressFormat.JPEG, 100, baosThumb);
+                    byte[] thumbData = baosThumb.toByteArray();
+
                     final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                    final String img_path = "activityStreamImages/" + sdf.format(timestamp) + "_" + firebaseAuth.getCurrentUser().getUid();
+                    String pathExtenstion = sdf.format(timestamp) + "_" + firebaseAuth.getCurrentUser().getUid();
+                    final String img_path = "activityStreamImages/" + pathExtenstion;
+                    final String thumbnailPath = "activityStreamThumbnails/" + pathExtenstion;
 
                     StorageReference imageRef = storageReference.child(img_path);
                     UploadTask uploadTask = imageRef.putBytes(data);
+
+                    StorageReference thumbnailRef = storageReference.child(thumbnailPath);
+                    final UploadTask uploadThumbTask = thumbnailRef.putBytes(thumbData);
 
                     final Map<String, String> map = new HashMap<String, String>();
                     map.put("downloadPath", img_path);
@@ -222,32 +234,44 @@ public class ImageUploadActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            final String key = databaseReference.child("activityStreamPosts").push().getKey();
-                            databaseReference.child("activityStreamPosts").child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(map);
-
-                            final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/followers/";
-                            DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
-                            followersList.addListenerForSingleValueEvent(new ValueEventListener() {
+                            uploadThumbTask.addOnFailureListener(new OnFailureListener() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                                    List followersList = dataSnapshot.getValue(t);
-                                    Log.i("LENGTH OF FOLLOWERS", String.valueOf(followersList.size()));
-                                    if( followersList == null ) {
-                                        System.out.println("");
-                                    }
-                                    else {
-                                        for(int i = 0; i < followersList.size(); i++) {
-                                            String tempUser = followersList.get(i).toString();
-                                            databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
-                                        }
-                                        Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
-                                    }
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(ImageUploadActivity.this, "ERROR WITH THUMB ULPOAD", Toast.LENGTH_SHORT).show();
                                 }
-
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    final Map<String, String> mapThumbnail = new HashMap<String, String>(map);
+                                    mapThumbnail.put("downloadPath", thumbnailPath);
 
+                                    final String key = databaseReference.child("activityStreamPosts").push().getKey();
+                                    databaseReference.child("activityStreamPosts").child(firebaseAuth.getCurrentUser().getUid()).child(key).setValue(mapThumbnail);
+
+                                    final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/followers/";
+                                    DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
+                                    followersList.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                                            List followersList = dataSnapshot.getValue(t);
+                                            if( followersList == null ) {
+                                                System.out.println("");
+                                            }
+                                            else {
+                                                for(int i = 0; i < followersList.size(); i++) {
+                                                    String tempUser = followersList.get(i).toString();
+                                                    databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
+                                                }
+                                                Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
                                 }
                             });
 
