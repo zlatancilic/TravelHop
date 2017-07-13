@@ -1,5 +1,6 @@
 package com.cilic.zlatan.travelhop;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,26 +8,36 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.app.AlertDialog;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
+import java.util.List;
 
+import models.Post;
+import models.PostWithImage;
 import utils.ExpandableGridView;
 import utils.GridImageAdapter;
 
@@ -52,10 +63,15 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     private OnFragmentInteractionListener mListener;
 
     Button editProfile;
-    FirebaseAuth firebaseAuth;
     SwipeRefreshLayout swipeRefreshLayout;
     ScrollView scrollView;
     ImageView userAvatarImageView;
+    ExpandableGridView gw;
+    FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+    List<PostWithImage> listOfPosts = new ArrayList<PostWithImage>();
+    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
     private Integer[] dataImages = {R.drawable.default_user_avatar, R.drawable.default_user_avatar,
             R.drawable.default_user_avatar, R.drawable.default_user_avatar,
@@ -106,14 +122,16 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         View profileFragment = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
 
         swipeRefreshLayout = (SwipeRefreshLayout) profileFragment.findViewById(R.id.swipe_container_user_profile);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setProgressViewOffset(true, 25, 230);
 
-        ExpandableGridView gw = (ExpandableGridView) profileFragment.findViewById(R.id.grid_view);
+        gw = (ExpandableGridView) profileFragment.findViewById(R.id.grid_view);
         gw.setExpanded(true);
-        gw.setAdapter(new GridImageAdapter(getContext(), dataImages));
+        gw.setAdapter(new GridImageAdapter(getContext(), listOfPosts));
 
 //        gw.setOnTouchListener(new View.OnTouchListener(){
 //
@@ -123,6 +141,8 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 //                return event.getAction() == MotionEvent.ACTION_MOVE;
 //            }
 //        });
+
+        loadData();
 
         userAvatarImageView = (ImageView) profileFragment.findViewById(R.id.user_profile_avatar);
         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.default_user_avatar);
@@ -180,10 +200,49 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         return profileFragment;
     }
 
+    private void loadData() {
+        final GridImageAdapter customAdapter = (GridImageAdapter) gw.getAdapter();
+        customAdapter.clearData();
+        firebaseDatabase.getReference("activityStreamPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    final Post currentPost = postSnapshot.getValue(Post.class);
+                    final PostWithImage postWithImage = new PostWithImage();
+                    postWithImage.setPost(currentPost);
+                    listOfPosts.add(0, postWithImage);
+                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+                    final long ONE_MEGABYTE = 1024 * 1024;
+                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            int index = listOfPosts.indexOf(postWithImage);
+                            listOfPosts.get(index).setImage(bitmap);
+                            customAdapter.addElements(listOfPosts);
+                            if(customAdapter.checkAllDataSet((int)dataSnapshot.getChildrenCount())) {
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     @Override
     public void onRefresh() {
-        editProfile.setText("AAAAAA");
-        swipeRefreshLayout.setRefreshing(false);
+        loadData();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

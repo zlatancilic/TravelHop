@@ -1,45 +1,64 @@
 package utils;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.media.Image;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cilic.zlatan.travelhop.R;
 
-/**
- * Created by zlatan on 06/07/2017.
- */
+import java.util.List;
+
+import models.PostWithImage;
 
 public class GridImageAdapter extends BaseAdapter {
 
     private Context activityContext;
 
-    private Integer[] dataImages;
+    private List listOfPosts;
 
-    public GridImageAdapter(Context c, Integer[] images) {
+    public GridImageAdapter(Context c, List<PostWithImage> listOfPosts) {
         activityContext = c;
-        dataImages = images;
+        this.listOfPosts = listOfPosts;
     }
 
     @Override
     public int getCount() {
-        return dataImages.length;
+        return listOfPosts.size();
+    }
+
+
+    public void addElements(List<PostWithImage> posts) {
+        listOfPosts = posts;
+
+        notifyDataSetChanged();
+    }
+
+    public boolean checkAllDataSet(int childrenCount) {
+        if(listOfPosts.size() == childrenCount) {
+            return true;
+        }
+        return false;
+    }
+
+    public void clearData() {
+        if(listOfPosts != null) {
+            listOfPosts.clear();
+        }
     }
 
     @Override
     public Object getItem(int position) {
-        return dataImages[position];
+        return listOfPosts.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
@@ -50,14 +69,19 @@ public class GridImageAdapter extends BaseAdapter {
         View gridView;
 
         if(convertView == null) {
-            gridView = new View(activityContext);
             gridView = layoutInflater.inflate(R.layout.grid_image, null);
-            ImageView imageView = (ImageView) gridView.findViewById(R.id.grid_item_image);
-            imageView.setImageResource(dataImages[position]);
         }
         else {
             gridView = (View) convertView;
         }
+
+        ImageView imageView = (ImageView) gridView.findViewById(R.id.grid_item_image);
+        PostWithImage currentPost = (PostWithImage) listOfPosts.get(position);
+        Bitmap imageToSet = currentPost.getImage();
+        if(imageToSet == null) {
+            imageToSet = BitmapFactory.decodeResource(activityContext.getResources(), R.drawable.loading_image);
+        }
+        imageView.setImageBitmap(imageToSet);
 
         return gridView;
     }
