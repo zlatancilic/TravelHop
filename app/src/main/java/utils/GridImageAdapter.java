@@ -13,6 +13,7 @@ import com.cilic.zlatan.travelhop.R;
 
 import java.util.List;
 
+import models.Post;
 import models.PostWithImage;
 
 public class GridImageAdapter extends BaseAdapter {
@@ -59,6 +60,11 @@ public class GridImageAdapter extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    public String getFirebaseId(int position) {
+        PostWithImage tempPost = (PostWithImage)listOfPosts.get(position);
+        return tempPost.getFirebaseId();
     }
 
     @Override

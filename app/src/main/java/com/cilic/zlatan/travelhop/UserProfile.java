@@ -19,10 +19,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -132,6 +134,13 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         gw = (ExpandableGridView) profileFragment.findViewById(R.id.grid_view);
         gw.setExpanded(true);
         gw.setAdapter(new GridImageAdapter(getContext(), listOfPosts));
+        gw.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                GridImageAdapter customAdapter = (GridImageAdapter)gw.getAdapter();
+                Toast.makeText(getContext(), customAdapter.getFirebaseId(position), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         postsCountTextView = (TextView) profileFragment.findViewById(R.id.posts_count);
         followersCountTextView = (TextView) profileFragment.findViewById(R.id.followers_count);
@@ -139,6 +148,9 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         usernameHeaderTextView = (TextView) profileFragment.findViewById(R.id.username_header);
         userProfileNameTextView = (TextView) profileFragment.findViewById(R.id.user_profile_name);
 
+        setCountText("0", "\nPOSTS", postsCountTextView);
+        setCountText("0", "\nFOLLOWERS", followersCountTextView);
+        setCountText("0", "\nFOLLOWING", followingCountTextView);
 //        gw.setOnTouchListener(new View.OnTouchListener(){
 //
 //
@@ -226,6 +238,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
                             int index = listOfPosts.indexOf(postWithImage);
                             listOfPosts.get(index).setImage(bitmap);
+                            listOfPosts.get(index).setFirebaseId(postSnapshot.getKey());
                             customAdapter.addElements(listOfPosts);
                             if(customAdapter.checkAllDataSet((int)dataSnapshot.getChildrenCount())) {
                                 String numberOfPosts = String.valueOf(dataSnapshot.getChildrenCount());
