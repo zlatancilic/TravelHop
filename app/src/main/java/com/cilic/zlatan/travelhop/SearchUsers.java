@@ -153,12 +153,10 @@ public class SearchUsers extends Fragment {
         followersList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
                 final List<String> followersList = new ArrayList<String>();
                 for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                     followersList.add(postSnapshot.getKey());
                 }
-                //final List<> followersList = new ArrayList<String>();
 
                 firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
