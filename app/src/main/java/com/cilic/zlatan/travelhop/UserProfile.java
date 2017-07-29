@@ -56,12 +56,12 @@ import utils.GridImageAdapter;
 public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM1 = "firebaseIdParam";
+    private static final String ARG_PARAM2 = "followingStatusParam";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String firebaseIdParam;
+    private String followingStatusParam;
 
     private OnFragmentInteractionListener mListener;
 
@@ -90,16 +90,16 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param firebaseId Parameter 1.
+     * @param followingStatus Parameter 2.
      * @return A new instance of fragment UserProfile.
      */
     // TODO: Rename and change types and number of parameters
-    public static UserProfile newInstance(String param1, String param2) {
+    public static UserProfile newInstance(String firebaseId, String followingStatus) {
         UserProfile fragment = new UserProfile();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, firebaseId);
+        args.putString(ARG_PARAM2, followingStatus);
         fragment.setArguments(args);
         return fragment;
     }
@@ -108,8 +108,8 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            firebaseIdParam = getArguments().getString(ARG_PARAM1);
+            followingStatusParam = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -134,7 +134,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 GridImageAdapter customAdapter = (GridImageAdapter)gw.getAdapter();
-                onItemPressed(customAdapter.getFirebaseId(position));
+                onItemPressed(customAdapter.getFirebaseId(position), firebaseIdParam);
             }
         });
 
@@ -218,7 +218,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         //****************** POPULATE USER POSTS GRID AND COUNT **************//
         final GridImageAdapter customAdapter = (GridImageAdapter) gw.getAdapter();
         customAdapter.clearData();
-        firebaseDatabase.getReference("activityStreamPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseDatabase.getReference("activityStreamPosts/" + firebaseIdParam).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
@@ -260,7 +260,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         });
 
         //****************** POPULATE USER NAME AND USERNAME **************//
-        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseDatabase.getReference("userDetails/" + firebaseIdParam).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 final UserDetails currentUserDetails = dataSnapshot.getValue(UserDetails.class);
@@ -275,7 +275,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         });
 
         //****************** POPULATE USER FOLLOWING COUNT **************//
-        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following").addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseDatabase.getReference("userDetails/" + firebaseIdParam + "/following").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
@@ -292,7 +292,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         });
 
         //****************** POPULATE USER FOLLOWERS COUNT **************//
-        firebaseDatabase.getReference("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/followers").addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseDatabase.getReference("userDetails/" + firebaseIdParam + "/followers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
@@ -309,7 +309,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         });
 
         //***************** POPULATE USER PROFILE PICTURE *****************//
-        StorageReference imageReference = storageReference.child("userProfileImages/" + firebaseAuth.getCurrentUser().getUid());
+        StorageReference imageReference = storageReference.child("userProfileImages/" + firebaseIdParam);
         final long ONE_MEGABYTE = 1024 * 1024;
         imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
@@ -332,9 +332,9 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onItemPressed(String id) {
+    public void onItemPressed(String postId, String userId) {
         if (mListener != null) {
-            mListener.openPost(id);
+            mListener.openPost(postId, userId);
         }
     }
 
@@ -384,6 +384,6 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void openPost(String id);
+        void openPost(String postId, String userId);
     }
 }

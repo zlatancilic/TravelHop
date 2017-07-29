@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -115,6 +116,13 @@ public class SearchUsers extends Fragment {
 //        customAdapter.setAppContext(getActivity().getApplicationContext());
 
         userListView.setAdapter(cAdapter);
+        userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getContext(), cAdapter.getFirebaseId(position), Toast.LENGTH_SHORT).show();
+                onUserClicked(cAdapter.getFirebaseId(position));
+            }
+        });
 
         searchEditText = (EditText) userListFragmentView.findViewById(R.id.search_users_edit_text);
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -138,6 +146,7 @@ public class SearchUsers extends Fragment {
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
+        listOfUsers.clear();
         final String followers_img_path = "userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/following/";
         DatabaseReference followersList = firebaseDatabase.getReference(followers_img_path);
         followersList.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -162,6 +171,7 @@ public class SearchUsers extends Fragment {
                                     } else {
                                         userWithImage.setFollowingStatus("Not following");
                                     }
+                                    userWithImage.setFirebaseId(postSnapshot.getKey());
                                     listOfUsers.add(0, userWithImage);
                                     StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
                                     final long ONE_MEGABYTE = 1024 * 1024;
@@ -203,9 +213,9 @@ public class SearchUsers extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onUserClicked(String firebaseId) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.openUserProfile(firebaseId);
         }
     }
 
@@ -238,6 +248,6 @@ public class SearchUsers extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void openUserProfile(String firebaseId);
     }
 }

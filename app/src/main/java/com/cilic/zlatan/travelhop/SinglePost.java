@@ -47,10 +47,12 @@ import utils.UserFeedListAdapter;
 public class SinglePost extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM1 = "postIdParam";
+    private static final String ARG_PARAM2 = "userIdParam";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private String postIdParam;
+    private String userIdParam;
     FirebaseAuth firebaseAuth;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
@@ -66,14 +68,16 @@ public class SinglePost extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
+     * @param postId Parameter 1.
+     * @param userId Parameter 2.
      * @return A new instance of fragment SinglePost.
      */
     // TODO: Rename and change types and number of parameters
-    public static SinglePost newInstance(String param1) {
+    public static SinglePost newInstance(String postId, String userId) {
         SinglePost fragment = new SinglePost();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM1, postId);
+        args.putString(ARG_PARAM2, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,7 +86,8 @@ public class SinglePost extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            postIdParam = getArguments().getString(ARG_PARAM1);
+            userIdParam = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -101,8 +106,8 @@ public class SinglePost extends Fragment {
         final TextView dateCreatedTextView = (TextView) singlePostFragment.findViewById(R.id.post_date_created);
         final ImageView postImageView = (ImageView) singlePostFragment.findViewById(R.id.post_image);
 
-        if(mParam1 != null) {
-            firebaseDatabase.getReference("activityStreamPosts/" + firebaseAuth.getCurrentUser().getUid() + "/" + mParam1).addListenerForSingleValueEvent(new ValueEventListener() {
+        if(postIdParam != null && userIdParam != null) {
+            firebaseDatabase.getReference("activityStreamPosts/" + userIdParam + "/" + postIdParam).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(final DataSnapshot dataSnapshot) {
                     final Post currentPost = dataSnapshot.getValue(Post.class);

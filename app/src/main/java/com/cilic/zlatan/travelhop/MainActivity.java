@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     //to implement
                 }
                 else {
-                    UserProfile usersProfileFrag = new UserProfile();
+                    UserProfile usersProfileFrag = UserProfile.newInstance(firebaseAuth.getCurrentUser().getUid(), null);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
@@ -165,10 +165,19 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     }
 
     @Override
-    public void openPost(String id) {
-        SinglePost singlePostFragment = SinglePost.newInstance(id);
+    public void openPost(String postId, String userId) {
+        SinglePost singlePostFragment = SinglePost.newInstance(postId, userId);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, singlePostFragment, SINGLE_POST_FRAGMENT_TAG);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public  void openUserProfile(String firebaseId) {
+        UserProfile usersProfileFrag = UserProfile.newInstance(firebaseId, null);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
         transaction.addToBackStack(null);
         transaction.commit();
     }

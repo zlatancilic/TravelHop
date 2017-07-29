@@ -54,6 +54,11 @@ public class SearchUsersListAdapter extends BaseAdapter implements Filterable{
         return position;
     }
 
+    public String getFirebaseId(int position) {
+        UserWithImage userWithImage = itemsToDisplay.get(position);
+        return userWithImage.getFirebaseId();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 

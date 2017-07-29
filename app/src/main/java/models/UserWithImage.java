@@ -7,6 +7,7 @@ public class UserWithImage {
     private UserDetails userDetails;
     private Bitmap image;
     private String followingStatus;
+    private String firebaseId;
 
     public UserWithImage() {}
 
@@ -37,5 +38,13 @@ public class UserWithImage {
 
     public void setFollowingStatus(String followingStatus) {
         this.followingStatus = followingStatus;
+    }
+
+    public String getFirebaseId() {
+        return firebaseId;
+    }
+
+    public void setFirebaseId(String firebaseId) {
+        this.firebaseId = firebaseId;
     }
 }
