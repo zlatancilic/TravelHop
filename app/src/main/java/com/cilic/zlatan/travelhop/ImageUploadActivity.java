@@ -32,6 +32,7 @@ import com.naver.android.helloyako.imagecrop.view.ImageCropView;
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -253,18 +254,16 @@ public class ImageUploadActivity extends AppCompatActivity {
                                     followersList.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                                            List followersList = dataSnapshot.getValue(t);
-                                            if( followersList == null ) {
-                                                System.out.println("");
+                                            final List<String> followersList = new ArrayList<String>();
+                                            for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                                followersList.add(postSnapshot.getKey());
                                             }
-                                            else {
-                                                for(int i = 0; i < followersList.size(); i++) {
-                                                    String tempUser = followersList.get(i).toString();
-                                                    databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
-                                                }
-                                                Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+                                            for(int i = 0; i < followersList.size(); i++) {
+                                                String tempUser = followersList.get(i).toString();
+                                                databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
                                             }
+                                            Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+
                                         }
 
                                         @Override

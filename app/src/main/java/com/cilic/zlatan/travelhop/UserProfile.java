@@ -196,6 +196,30 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             }
             else {
                 editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.not_following_status));
+                editProfile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String currentUserId = firebaseAuth.getCurrentUser().getUid();
+                        String userToFollow = firebaseIdParam;
+
+                        firebaseDatabase.getReference("activityStreamPosts/" + userToFollow).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(final DataSnapshot dataSnapshot) {
+                                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                    final Post currentPost = postSnapshot.getValue(Post.class);
+                                    final String postId = postSnapshot.getKey();
+                                    currentPost.setDownloadPath(currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages"));
+                                    databaseReference.child("userFeedPosts").child(currentUserId).child(postId).setValue(currentPost);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
             }
         }
 

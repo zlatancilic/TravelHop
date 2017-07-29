@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -152,54 +153,54 @@ public class SearchUsers extends Fragment {
         followersList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                final List followersList = dataSnapshot.getValue(t);
-                if( followersList == null ) {
-
+                //GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                final List<String> followersList = new ArrayList<String>();
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    followersList.add(postSnapshot.getKey());
                 }
-                else {
-                    firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                if(!firebaseAuth.getCurrentUser().getUid().equals(postSnapshot.getKey())) {
-                                    final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
-                                    final UserWithImage userWithImage = new UserWithImage();
-                                    userWithImage.setUserDetails(currentUserDetails);
-//                                    if (followersList.contains(postSnapshot.getKey())) {
-//                                        userWithImage.setFollowingStatus("Following");
-//                                    } else {
-//                                        userWithImage.setFollowingStatus("Not following");
-//                                    }
-                                    userWithImage.setFollowingStatus(followersList.contains(postSnapshot.getKey()));
-                                    userWithImage.setFirebaseId(postSnapshot.getKey());
-                                    listOfUsers.add(0, userWithImage);
-                                    StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
-                                    final long ONE_MEGABYTE = 1024 * 1024;
-                                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytes) {
-                                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                            int index = listOfUsers.indexOf(userWithImage);
-                                            listOfUsers.get(index).setImage(bitmap);
-                                            cAdapter.notifyDataSetChanged();
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
+                //final List<> followersList = new ArrayList<String>();
 
-                                        }
-                                    });
+                firebaseDatabase.getReference("userDetails/").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            if(!firebaseAuth.getCurrentUser().getUid().equals(postSnapshot.getKey())) {
+                                final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
+                                final UserWithImage userWithImage = new UserWithImage();
+                                userWithImage.setUserDetails(currentUserDetails);
+                                boolean followingStatusTemp = false;
+                                if(followersList != null) {
+                                    followingStatusTemp = followersList.contains(postSnapshot.getKey());
                                 }
+                                userWithImage.setFollowingStatus(followingStatusTemp);
+                                userWithImage.setFirebaseId(postSnapshot.getKey());
+                                listOfUsers.add(0, userWithImage);
+                                System.out.println(postSnapshot.getKey());
+                                StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
+                                final long ONE_MEGABYTE = 1024 * 1024;
+                                imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        int index = listOfUsers.indexOf(userWithImage);
+                                        listOfUsers.get(index).setImage(bitmap);
+                                        cAdapter.notifyDataSetChanged();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                    }
+                                });
                             }
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
+                    }
+                });
             }
 
             @Override
