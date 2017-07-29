@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,7 +23,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,8 +34,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,7 +134,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 GridImageAdapter customAdapter = (GridImageAdapter)gw.getAdapter();
-                Toast.makeText(getContext(), customAdapter.getFirebaseId(position), Toast.LENGTH_SHORT).show();
+                onItemPressed(customAdapter.getFirebaseId(position));
             }
         });
 
@@ -336,9 +332,9 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onItemPressed(String id) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.openPost(id);
         }
     }
 
@@ -388,6 +384,6 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void openPost(String id);
     }
 }

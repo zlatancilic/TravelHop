@@ -17,7 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements UserFeed.OnFragmentInteractionListener,
         SearchUsers.OnFragmentInteractionListener,
-        UserProfile.OnFragmentInteractionListener {
+        UserProfile.OnFragmentInteractionListener,
+        SinglePost.OnFragmentInteractionListener {
 
     ImageView takeImage;
     ImageView pickImage;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     private final String USER_FEED_FRAGMENT_TAG = "HOME_USER_FEED_FRAGMENT";
     private final String SEARCH_USERS_FRAGMENT_TAG = "SEARCH_USERS_FRAGMENT";
     private final String USER_PROFILE_FRAGMENT_TAG = "USER_PROFILE_FRAGMENT";
+    private final String SINGLE_POST_FRAGMENT_TAG = "SINGLE_POST_FRAGMENT";
 
     FirebaseAuth firebaseAuth;
 
@@ -160,6 +162,15 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void openPost(String id) {
+        SinglePost singlePostFragment = SinglePost.newInstance(id);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, singlePostFragment, SINGLE_POST_FRAGMENT_TAG);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void startUploadActivity(String option) {

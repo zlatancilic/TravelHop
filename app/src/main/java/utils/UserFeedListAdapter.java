@@ -75,46 +75,8 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             }
 
             if (tt3 != null) {
-                long diff_number = System.currentTimeMillis() / 1000L - Long.valueOf(p.getPost().getDateCreated());
-                String seconds_text = " SECOND";
-                if(diff_number > 1) {
-                    seconds_text += "S";
-                }
-                String diff_text = String.valueOf(diff_number) + seconds_text;
-
-                if(isBetween(diff_number, 61, 3600)) {
-                    long temp_diff = (diff_number / (60)) % 60;
-                    String temp_text = " MINUTE";
-                    if(temp_diff > 1) {
-                        temp_text += "S";
-                    }
-                    diff_text = String.valueOf(temp_diff) + temp_text;
-                }
-                else if(isBetween(diff_number, (long)3601, (long)86400)) {
-                    long temp_diff = (diff_number / (60*60)) % 24;
-                    String temp_text = " HOUR";
-                    if(temp_diff > 1) {
-                        temp_text += "S";
-                    }
-                    diff_text = String.valueOf(temp_diff) + temp_text;
-                }
-                else if(isBetween(diff_number, 86401, 604800)) {
-                    long temp_diff = diff_number / (60*60*24);
-                    String temp_text = " DAY";
-                    if(temp_diff > 1) {
-                        temp_text += "S";
-                    }
-                    diff_text = String.valueOf(temp_diff) + temp_text;
-                }
-                else if(diff_number > 604801) {
-                    long temp_diff = diff_number / (60*60*24*7);
-                    String temp_text = " WEEK";
-                    if(temp_diff > 1) {
-                        temp_text += "S";
-                    }
-                    diff_text = String.valueOf(temp_diff) + temp_text;
-                }
-                tt3.setText(diff_text + " AGO");
+                TimeDifferenceCalculator timeDifferenceCalculator = new TimeDifferenceCalculator();
+                tt3.setText(timeDifferenceCalculator.calculateAndFormat(Long.valueOf(p.getPost().getDateCreated())));
             }
 
 
@@ -124,82 +86,11 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
                     tempBitmap = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.loading_image);
                 }
                 iv1.setImageBitmap(tempBitmap);
-                scaleImage(iv1);
+                ImageTools imageTools = new ImageTools();
+                imageTools.scaleImage(iv1, applicationContext);
             }
         }
 
         return v;
-    }
-
-    private void scaleImage(ImageView view) throws NoSuchElementException {
-        Bitmap bitmap = null;
-
-        try {
-            Drawable drawing = view.getDrawable();
-            bitmap = ((BitmapDrawable) drawing).getBitmap();
-        } catch (NullPointerException e) {
-            throw new NoSuchElementException("No drawable on given view");
-        } catch (ClassCastException e) {
-            // Check bitmap is Ion drawable
-        }
-
-        // Get current dimensions AND the desired bounding box
-        int width = 0;
-
-        try {
-            width = bitmap.getWidth();
-        } catch (NullPointerException e) {
-            throw new NoSuchElementException("Can't find bitmap on given view/drawable");
-        }
-
-        int height = bitmap.getHeight();
-        DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
-        float bounding = displayMetrics.widthPixels;
-
-        if(height > width) {
-            float xScale = bounding/ width;
-            bounding = xScale * height;
-        }
-
-        Log.i("Test", "original width = " + Integer.toString(width));
-        Log.i("Test", "original height = " + Integer.toString(height));
-        Log.i("Test", "bounding = " + Float.toString(bounding));
-
-        // Determine how much to scale: the dimension requiring less scaling is
-        // closer to the its side. This way the image always stays inside your
-        // bounding box AND either x/y axis touches it.
-        float xScale = bounding / width;
-        float yScale = bounding/ height;
-        float scale = (xScale <= yScale) ? xScale : yScale;
-        Log.i("Test", "xScale = " + Float.toString(xScale));
-        Log.i("Test", "yScale = " + Float.toString(yScale));
-        Log.i("Test", "scale = " + Float.toString(scale));
-
-        // Create a matrix for the scaling and add the scaling data
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-
-        // Create a new bitmap and convert it to a format understood by the ImageView
-        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        width = scaledBitmap.getWidth(); // re-use
-        height = scaledBitmap.getHeight(); // re-use
-        BitmapDrawable result = new BitmapDrawable(scaledBitmap);
-        Log.i("Test", "scaled width = " + Integer.toString(width));
-        Log.i("Test", "scaled height = " + Integer.toString(height));
-
-        // Apply the scaled bitmap
-        view.setImageDrawable(result);
-
-        // Now change ImageView's dimensions to match the scaled image
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) view.getLayoutParams();
-        params.width = width;
-        params.height = height;
-        view.setLayoutParams(params);
-
-        Log.i("Test", "done");
-    }
-
-    private boolean isBetween(long a, long lower, long upper) {
-        return a <= upper && a >= lower;
     }
 }
