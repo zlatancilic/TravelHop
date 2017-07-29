@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     public void openPost(String id) {
         SinglePost singlePostFragment = SinglePost.newInstance(id);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, singlePostFragment, SINGLE_POST_FRAGMENT_TAG);
+        transaction.add(R.id.fragment_container, singlePostFragment, SINGLE_POST_FRAGMENT_TAG);
         transaction.addToBackStack(null);
         transaction.commit();
     }
