@@ -200,7 +200,10 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                     @Override
                     public void onClick(View v) {
                         final String currentUserId = firebaseAuth.getCurrentUser().getUid();
-                        String userToFollow = firebaseIdParam;
+                        final String userToFollow = firebaseIdParam;
+
+                        databaseReference.child("userDetails").child(currentUserId).child("following").child(userToFollow).setValue(userToFollow);
+                        databaseReference.child("userDetails").child(userToFollow).child("followers").child(currentUserId).setValue(currentUserId);
 
                         firebaseDatabase.getReference("activityStreamPosts/" + userToFollow).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
