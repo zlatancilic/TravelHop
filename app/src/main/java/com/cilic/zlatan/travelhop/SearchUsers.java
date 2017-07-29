@@ -120,7 +120,7 @@ public class SearchUsers extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(getContext(), cAdapter.getFirebaseId(position), Toast.LENGTH_SHORT).show();
-                onUserClicked(cAdapter.getFirebaseId(position));
+                onUserClicked(cAdapter.getFirebaseId(position), cAdapter.getFollowingStatus(position));
             }
         });
 
@@ -166,11 +166,12 @@ public class SearchUsers extends Fragment {
                                     final UserDetails currentUserDetails = postSnapshot.getValue(UserDetails.class);
                                     final UserWithImage userWithImage = new UserWithImage();
                                     userWithImage.setUserDetails(currentUserDetails);
-                                    if (followersList.contains(postSnapshot.getKey())) {
-                                        userWithImage.setFollowingStatus("Following");
-                                    } else {
-                                        userWithImage.setFollowingStatus("Not following");
-                                    }
+//                                    if (followersList.contains(postSnapshot.getKey())) {
+//                                        userWithImage.setFollowingStatus("Following");
+//                                    } else {
+//                                        userWithImage.setFollowingStatus("Not following");
+//                                    }
+                                    userWithImage.setFollowingStatus(followersList.contains(postSnapshot.getKey()));
                                     userWithImage.setFirebaseId(postSnapshot.getKey());
                                     listOfUsers.add(0, userWithImage);
                                     StorageReference imageReference = storageReference.child("userProfileImages/" + postSnapshot.getKey());
@@ -213,9 +214,9 @@ public class SearchUsers extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onUserClicked(String firebaseId) {
+    public void onUserClicked(String firebaseId, boolean followingStatus) {
         if (mListener != null) {
-            mListener.openUserProfile(firebaseId);
+            mListener.openUserProfile(firebaseId, followingStatus);
         }
     }
 
@@ -248,6 +249,6 @@ public class SearchUsers extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void openUserProfile(String firebaseId);
+        void openUserProfile(String firebaseId, boolean followingStatus);
     }
 }

@@ -6,9 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -61,7 +63,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
     // TODO: Rename and change types of parameters
     private String firebaseIdParam;
-    private String followingStatusParam;
+    private boolean followingStatusParam;
 
     private OnFragmentInteractionListener mListener;
 
@@ -95,11 +97,11 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
      * @return A new instance of fragment UserProfile.
      */
     // TODO: Rename and change types and number of parameters
-    public static UserProfile newInstance(String firebaseId, String followingStatus) {
+    public static UserProfile newInstance(String firebaseId, boolean followingStatus) {
         UserProfile fragment = new UserProfile();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, firebaseId);
-        args.putString(ARG_PARAM2, followingStatus);
+        args.putBoolean(ARG_PARAM2, followingStatus);
         fragment.setArguments(args);
         return fragment;
     }
@@ -109,7 +111,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             firebaseIdParam = getArguments().getString(ARG_PARAM1);
-            followingStatusParam = getArguments().getString(ARG_PARAM2);
+            followingStatusParam = getArguments().getBoolean(ARG_PARAM2);
         }
     }
 
@@ -177,13 +179,25 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         });
 
         editProfile = (Button) profileFragment.findViewById(R.id.edit_profile);
-        editProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getActivity(), EditProfileActivity.class);
-                startActivity(i);
+
+        if (firebaseIdParam.equals(firebaseAuth.getCurrentUser().getUid())) {
+            editProfile.setText("Edit Profile");
+            editProfile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(getActivity(), EditProfileActivity.class);
+                    startActivity(i);
+                }
+            });
+        }
+        else {
+            if(followingStatusParam) {
+                editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.following_status));
             }
-        });
+            else {
+                editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.not_following_status));
+            }
+        }
 
         TextView signOut = (TextView) profileFragment.findViewById(R.id.sign_out);
         signOut.setOnClickListener(new View.OnClickListener() {

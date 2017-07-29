@@ -6,7 +6,7 @@ public class UserWithImage {
 
     private UserDetails userDetails;
     private Bitmap image;
-    private String followingStatus;
+    private boolean followingStatus;
     private String firebaseId;
 
     public UserWithImage() {}
@@ -32,11 +32,11 @@ public class UserWithImage {
         this.image = image;
     }
 
-    public String getFollowingStatus() {
+    public boolean getFollowingStatus() {
         return followingStatus;
     }
 
-    public void setFollowingStatus(String followingStatus) {
+    public void setFollowingStatus(boolean followingStatus) {
         this.followingStatus = followingStatus;
     }
 

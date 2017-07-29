@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     private final String USER_FEED_FRAGMENT_TAG = "HOME_USER_FEED_FRAGMENT";
     private final String SEARCH_USERS_FRAGMENT_TAG = "SEARCH_USERS_FRAGMENT";
     private final String USER_PROFILE_FRAGMENT_TAG = "USER_PROFILE_FRAGMENT";
+    private final String OTHER_USER_PROFILE_FRAGMENT_TAG = "OTHER_USER_PROFILE_FRAGMENT";
     private final String SINGLE_POST_FRAGMENT_TAG = "SINGLE_POST_FRAGMENT";
 
     FirebaseAuth firebaseAuth;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                     //to implement
                 }
                 else {
-                    UserProfile usersProfileFrag = UserProfile.newInstance(firebaseAuth.getCurrentUser().getUid(), null);
+                    UserProfile usersProfileFrag = UserProfile.newInstance(firebaseAuth.getCurrentUser().getUid(), true);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
                     transaction.addToBackStack(null);
@@ -174,10 +175,10 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     }
 
     @Override
-    public  void openUserProfile(String firebaseId) {
-        UserProfile usersProfileFrag = UserProfile.newInstance(firebaseId, null);
+    public  void openUserProfile(String firebaseId, boolean followingStatus) {
+        UserProfile usersProfileFrag = UserProfile.newInstance(firebaseId, followingStatus);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, usersProfileFrag, USER_PROFILE_FRAGMENT_TAG);
+        transaction.replace(R.id.fragment_container, usersProfileFrag, OTHER_USER_PROFILE_FRAGMENT_TAG);
         transaction.addToBackStack(null);
         transaction.commit();
     }

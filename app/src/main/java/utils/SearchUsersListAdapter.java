@@ -59,6 +59,11 @@ public class SearchUsersListAdapter extends BaseAdapter implements Filterable{
         return userWithImage.getFirebaseId();
     }
 
+    public boolean getFollowingStatus(int position) {
+        UserWithImage userWithImage = itemsToDisplay.get(position);
+        return userWithImage.getFollowingStatus();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -85,7 +90,15 @@ public class SearchUsersListAdapter extends BaseAdapter implements Filterable{
             }
 
             if (tt3 != null) {
-                tt3.setText(p.getFollowingStatus());
+                String textToSet = "";
+                if(p.getFollowingStatus()) {
+                    textToSet = applicationContext.getResources().getString(R.string.following_status);
+                }
+                else {
+                    textToSet = applicationContext.getResources().getString(R.string.not_following_status);
+                }
+
+                tt3.setText(textToSet);
             }
 
 

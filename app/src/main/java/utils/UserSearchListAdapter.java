@@ -62,7 +62,7 @@ public class UserSearchListAdapter extends ArrayAdapter<UserWithImage>{
             }
 
             if (tt3 != null) {
-                tt3.setText(p.getFollowingStatus());
+//                tt3.setText(p.getFollowingStatus());
             }
 
 
