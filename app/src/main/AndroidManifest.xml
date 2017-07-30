@@ -37,7 +37,8 @@
             android:name=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ImageUploadActivity" />
+        <activity android:name=".ImageUploadActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>/>
         <activity android:name=".EditProfileActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>

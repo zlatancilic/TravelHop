@@ -1,5 +1,6 @@
 package com.cilic.zlatan.travelhop;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -42,9 +44,10 @@ import models.UserDetails;
 public class ImageUploadActivity extends AppCompatActivity {
 
 //    ImageView imageView;
-    Button openGalleryButton;
-    Button openCameraButton;
-    Button uploadImageButton;
+    RelativeLayout openGalleryButton;
+    RelativeLayout openCameraButton;
+    RelativeLayout uploadImageButton;
+    RelativeLayout cancelActionButton;
     EditText captionEditText;
     EditText locationEditText;
     ImageCropView imageCropView;
@@ -65,9 +68,10 @@ public class ImageUploadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_upload);
 
 //        imageView = (ImageView) findViewById(R.id.selected_image_imageview);
-        openGalleryButton = (Button) findViewById(R.id.gallery_button);
-        openCameraButton = (Button) findViewById(R.id.camera_button);
-        uploadImageButton = (Button) findViewById(R.id.upload_image_button);
+        openGalleryButton = (RelativeLayout) findViewById(R.id.gallery_button_container);
+        openCameraButton = (RelativeLayout) findViewById(R.id.camera_button_container);
+        uploadImageButton = (RelativeLayout) findViewById(R.id.upload_button_container);
+        cancelActionButton = (RelativeLayout) findViewById(R.id.cancel_button_container);
         captionEditText = (EditText) findViewById(R.id.caption_edittext);
         locationEditText = (EditText) findViewById(R.id.location_edittext);
         imageCropView = (ImageCropView) findViewById(R.id.selected_image_imageview_offset);
@@ -107,6 +111,14 @@ public class ImageUploadActivity extends AppCompatActivity {
                 else {
                     openCamera();
                 }
+            }
+        });
+
+        cancelActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(Activity.RESULT_CANCELED, new Intent());
+                finish();
             }
         });
 
@@ -238,7 +250,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                             uploadThumbTask.addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(ImageUploadActivity.this, "ERROR WITH THUMB ULPOAD", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ImageUploadActivity.this, "ERROR WITH THUMB UPLOAD", Toast.LENGTH_SHORT).show();
                                 }
                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
@@ -262,7 +274,9 @@ public class ImageUploadActivity extends AppCompatActivity {
                                                 String tempUser = followersList.get(i).toString();
                                                 databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
                                             }
-                                            Toast.makeText(ImageUploadActivity.this, "SUCCESS", Toast.LENGTH_SHORT).show();
+
+                                            setResult(Activity.RESULT_OK, new Intent());
+                                            finish();
 
                                         }
 
