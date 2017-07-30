@@ -187,7 +187,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                 @Override
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), EditProfileActivity.class);
-                    getActivity().startActivityForResult(i, 2);
+                    getActivity().startActivityForResult(i, MainActivity.REQUEST_EDIT_PROFILE);
                 }
             });
         }

@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
+    public static int REQUEST_EDIT_PROFILE = 333;
+    public static int REQUEST_MAKE_POST = 444;
     private final String USER_FEED_FRAGMENT_TAG = "HOME_USER_FEED_FRAGMENT";
     private final String SEARCH_USERS_FRAGMENT_TAG = "SEARCH_USERS_FRAGMENT";
     private final String USER_PROFILE_FRAGMENT_TAG = "USER_PROFILE_FRAGMENT";
@@ -152,13 +154,13 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 1 && resultCode == RESULT_OK) {
+        if(requestCode == REQUEST_MAKE_POST && resultCode == RESULT_OK) {
             Toast.makeText(MainActivity.this, "Image uploaded", Toast.LENGTH_SHORT).show();
         }
-        else if(requestCode == 1 && resultCode != RESULT_OK) {
+        else if(requestCode == REQUEST_MAKE_POST && resultCode != RESULT_OK) {
             Toast.makeText(MainActivity.this, "Image upload canceled", Toast.LENGTH_SHORT).show();
         }
-        else if(requestCode == 2 && resultCode == RESULT_OK) {
+        else if(requestCode == REQUEST_EDIT_PROFILE && resultCode == RESULT_OK) {
             Toast.makeText(MainActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
             UserProfile userProfileFragment = (UserProfile) getSupportFragmentManager().findFragmentByTag(USER_PROFILE_FRAGMENT_TAG);
             if(userProfileFragment != null && userProfileFragment.isVisible()) {
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
     private void startUploadActivity(String option) {
         Intent goToImageUploadIntent = new Intent(MainActivity.this, ImageUploadActivity.class);
         goToImageUploadIntent.putExtra("type", option);
-        startActivityForResult(goToImageUploadIntent, 1);
+        startActivityForResult(goToImageUploadIntent, REQUEST_MAKE_POST);
     }
 
     @Override
