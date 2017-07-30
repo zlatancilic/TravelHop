@@ -1,6 +1,8 @@
 package com.cilic.zlatan.travelhop;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -27,6 +30,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 
@@ -35,6 +40,7 @@ public class EditProfileActivity extends AppCompatActivity {
     ImageView userPhotoImageView;
     ImageView takeImage;
     ImageView pickImage;
+    TextView changePhotoTextView;
     ImageView cancelChanges;
     ImageView confirmChanges;
 
@@ -50,35 +56,25 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
 
         userPhotoImageView = (ImageView) findViewById(R.id.user_profile_editing);
+        changePhotoTextView = (TextView) findViewById(R.id.change_photo_label);
+        changePhotoTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final CharSequence options[] = new CharSequence[] {"Camera", "Gallery"};
+                new AlertDialog.Builder(EditProfileActivity.this)
+                        .setTitle("How do you want to upload the photo?")
+                        .setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startPhotoActivity(String.valueOf(options[which]));
+                            }
+                        })
+                        .show();
+            }
+        });
 
         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.default_user_avatar);
         setImage(icon);
-
-        takeImage = (ImageView) findViewById(R.id.take_image_profile_photo);
-        takeImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-                }
-                else {
-                    openCamera();
-                }
-            }
-        });
-
-        pickImage = (ImageView) findViewById(R.id.pick_image_profile_photo);
-        pickImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_GALLERY_PERMISSION);
-                }
-                else {
-                    openGallery();
-                }
-            }
-        });
 
         cancelChanges = (ImageView) findViewById(R.id.profile_edit_cancel);
         cancelChanges.setOnClickListener(new View.OnClickListener() {
@@ -116,6 +112,25 @@ public class EditProfileActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void startPhotoActivity(String option) {
+        if(option.equals("Camera")) {
+            if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+            }
+            else {
+                openCamera();
+            }
+        }
+        else if(option.equals("Gallery")) {
+            if(Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_GALLERY_PERMISSION);
+            }
+            else {
+                openGallery();
+            }
+        }
     }
 
     private void openCamera() {
