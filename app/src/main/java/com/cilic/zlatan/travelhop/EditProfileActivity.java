@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +39,11 @@ import java.sql.Timestamp;
 public class EditProfileActivity extends AppCompatActivity {
 
     ImageView userPhotoImageView;
-    ImageView takeImage;
-    ImageView pickImage;
     TextView changePhotoTextView;
     ImageView cancelChanges;
     ImageView confirmChanges;
+    EditText editUserName;
+    EditText editUserUsername;
 
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
@@ -75,6 +76,20 @@ public class EditProfileActivity extends AppCompatActivity {
 
         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.default_user_avatar);
         setImage(icon);
+
+        editUserName = (EditText) findViewById(R.id.edit_user_name);
+        editUserUsername = (EditText) findViewById(R.id.edit_username);
+
+        Intent i = getIntent();
+        if(i.hasExtra(UserProfile.USER_NAME_EXTRA_TAG)) {
+            editUserName.setText(i.getStringExtra(UserProfile.USER_NAME_EXTRA_TAG));
+        }
+        if(i.hasExtra(UserProfile.USER_USERNAME_EXTRA_TAG)) {
+            editUserUsername.setText(i.getStringExtra(UserProfile.USER_USERNAME_EXTRA_TAG));
+        }
+        if(i.hasExtra(UserProfile.USER_PICTURE_EXTRA_TAG)) {
+            setImage((Bitmap) i.getParcelableExtra(UserProfile.USER_PICTURE_EXTRA_TAG));
+        }
 
         cancelChanges = (ImageView) findViewById(R.id.profile_edit_cancel);
         cancelChanges.setOnClickListener(new View.OnClickListener() {

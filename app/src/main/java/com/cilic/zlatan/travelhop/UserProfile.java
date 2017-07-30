@@ -62,6 +62,10 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     private static final String ARG_PARAM1 = "firebaseIdParam";
     private static final String ARG_PARAM2 = "followingStatusParam";
 
+    public static String USER_NAME_EXTRA_TAG = "userName";
+    public static String USER_USERNAME_EXTRA_TAG = "userUsername";
+    public static String USER_PICTURE_EXTRA_TAG = "userProfilePicture";
+
     // TODO: Rename and change types of parameters
     private String firebaseIdParam;
     private boolean followingStatusParam;
@@ -78,6 +82,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     TextView followingCountTextView;
     TextView usernameHeaderTextView;
     TextView userProfileNameTextView;
+    Bitmap userProfilePicture;
 
     FirebaseAuth firebaseAuth;
     FirebaseDatabase firebaseDatabase;
@@ -182,11 +187,15 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         editProfile = (Button) profileFragment.findViewById(R.id.edit_profile);
 
         if (firebaseIdParam.equals(firebaseAuth.getCurrentUser().getUid())) {
+            editProfile.setEnabled(false);
             editProfile.setText("Edit Profile");
             editProfile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), EditProfileActivity.class);
+                    i.putExtra(USER_USERNAME_EXTRA_TAG, usernameHeaderTextView.getText());
+                    i.putExtra(USER_NAME_EXTRA_TAG, userProfileNameTextView.getText());
+                    i.putExtra(USER_PICTURE_EXTRA_TAG, userProfilePicture);
                     getActivity().startActivityForResult(i, MainActivity.REQUEST_EDIT_PROFILE);
                 }
             });
@@ -346,7 +355,9 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             @Override
             public void onSuccess(byte[] bytes) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                userProfilePicture = bitmap;
                 setImage(bitmap);
+                editProfile.setEnabled(true);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
