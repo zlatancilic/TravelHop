@@ -187,7 +187,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                 @Override
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), EditProfileActivity.class);
-                    startActivity(i);
+                    getActivity().startActivityForResult(i, 2);
                 }
             });
         }
@@ -245,7 +245,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         return profileFragment;
     }
 
-    private void loadData() {
+    public void loadData() {
         //****************** POPULATE USER POSTS GRID AND COUNT **************//
         final GridImageAdapter customAdapter = (GridImageAdapter) gw.getAdapter();
         customAdapter.clearData();

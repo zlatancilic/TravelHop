@@ -158,6 +158,13 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
         else if(requestCode == 1 && resultCode != RESULT_OK) {
             Toast.makeText(MainActivity.this, "Image upload canceled", Toast.LENGTH_SHORT).show();
         }
+        else if(requestCode == 2 && resultCode == RESULT_OK) {
+            Toast.makeText(MainActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
+            UserProfile userProfileFragment = (UserProfile) getSupportFragmentManager().findFragmentByTag(USER_PROFILE_FRAGMENT_TAG);
+            if(userProfileFragment != null && userProfileFragment.isVisible()) {
+                userProfileFragment.loadData();
+            }
+        }
     }
 
     @Override

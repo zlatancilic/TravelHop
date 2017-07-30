@@ -1,5 +1,6 @@
 package com.cilic.zlatan.travelhop;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -104,14 +105,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Toast.makeText(EditProfileActivity.this, "Image upload successful", Toast.LENGTH_SHORT).show();
-
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                EditProfileActivity.this.finish();
-                            }
-                        }, 2000);
+                        setResult(Activity.RESULT_OK);
+                        finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
