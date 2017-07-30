@@ -121,6 +121,7 @@
                         android:id="@+id/edit_profile"
                         android:text="@string/edit_profile"
                         android:layout_margin="14dp"
+                        android:background="@drawable/login_button"
                         android:layout_below="@+id/posts_count"/>
 
 

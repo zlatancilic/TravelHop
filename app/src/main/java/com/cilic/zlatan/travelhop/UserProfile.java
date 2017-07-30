@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -193,34 +194,23 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         else {
             if(followingStatusParam) {
                 editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.following_status));
-            }
-            else {
-                editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.not_following_status));
+                editProfile.setBackgroundResource(R.drawable.edit_text_back);
+                editProfile.setTextColor(ContextCompat.getColor(getContext(), R.color.midGray));
                 editProfile.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final String currentUserId = firebaseAuth.getCurrentUser().getUid();
-                        final String userToFollow = firebaseIdParam;
-
-                        databaseReference.child("userDetails").child(currentUserId).child("following").child(userToFollow).setValue(userToFollow);
-                        databaseReference.child("userDetails").child(userToFollow).child("followers").child(currentUserId).setValue(currentUserId);
-
-                        firebaseDatabase.getReference("activityStreamPosts/" + userToFollow).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(final DataSnapshot dataSnapshot) {
-                                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                    final Post currentPost = postSnapshot.getValue(Post.class);
-                                    final String postId = postSnapshot.getKey();
-                                    currentPost.setDownloadPath(currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages"));
-                                    databaseReference.child("userFeedPosts").child(currentUserId).child(postId).setValue(currentPost);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+                        unfollowUser();
+                    }
+                });
+            }
+            else {
+                editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.propose_follow));
+                editProfile.setBackgroundResource(R.drawable.follow_button);
+                editProfile.setTextColor(ContextCompat.getColor(getContext(), R.color.backgroundWhite));
+                editProfile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        followUser();
                     }
                 });
             }
@@ -386,6 +376,87 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
         SpannableString spannableString=  new SpannableString(postsCountString);
         spannableString.setSpan(new RelativeSizeSpan(0.5f), offset, offset + additionalOffset,0);
         textView.setText(spannableString);
+    }
+
+    private void unfollowUser() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("UNFOLLOW USER")
+                .setIcon(R.drawable.ic_person_outline_black_24dp)
+                .setMessage("Stop following this user?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String currentUserId = firebaseAuth.getCurrentUser().getUid();
+                        final String userToUnfollow = firebaseIdParam;
+
+                        editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.propose_follow));
+                        editProfile.setBackgroundResource(R.drawable.follow_button);
+                        editProfile.setTextColor(ContextCompat.getColor(getContext(), R.color.backgroundWhite));
+
+                        databaseReference.child("userDetails").child(currentUserId).child("following").child(userToUnfollow).removeValue();
+                        databaseReference.child("userDetails").child(userToUnfollow).child("followers").child(currentUserId).removeValue();
+
+                        firebaseDatabase.getReference("activityStreamPosts/" + userToUnfollow).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(final DataSnapshot dataSnapshot) {
+                                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                    final Post currentPost = postSnapshot.getValue(Post.class);
+                                    final String postId = postSnapshot.getKey();
+                                    databaseReference.child("userFeedPosts").child(currentUserId).child(postId).removeValue();
+                                    editProfile.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            followUser();
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void followUser() {
+        final String currentUserId = firebaseAuth.getCurrentUser().getUid();
+        final String userToFollow = firebaseIdParam;
+
+        editProfile.setText(getActivity().getApplicationContext().getResources().getString(R.string.following_status));
+        editProfile.setBackgroundResource(R.drawable.edit_text_back);
+        editProfile.setTextColor(ContextCompat.getColor(getContext(), R.color.midGray));
+
+        databaseReference.child("userDetails").child(currentUserId).child("following").child(userToFollow).setValue(userToFollow);
+        databaseReference.child("userDetails").child(userToFollow).child("followers").child(currentUserId).setValue(currentUserId);
+
+        firebaseDatabase.getReference("activityStreamPosts/" + userToFollow).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    final Post currentPost = postSnapshot.getValue(Post.class);
+                    final String postId = postSnapshot.getKey();
+                    currentPost.setDownloadPath(currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages"));
+                    databaseReference.child("userFeedPosts").child(currentUserId).child(postId).setValue(currentPost);
+                    editProfile.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            unfollowUser();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
