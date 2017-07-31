@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -58,6 +60,8 @@ public class SinglePost extends Fragment {
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
+    ImageView userPhotoImageView;
+
     private OnFragmentInteractionListener mListener;
 
     public SinglePost() {
@@ -105,6 +109,7 @@ public class SinglePost extends Fragment {
         final TextView postCaptionTextView = (TextView) singlePostFragment.findViewById(R.id.post_caption);
         final TextView dateCreatedTextView = (TextView) singlePostFragment.findViewById(R.id.post_date_created);
         final ImageView postImageView = (ImageView) singlePostFragment.findViewById(R.id.post_image);
+        userPhotoImageView = (ImageView) singlePostFragment.findViewById(R.id.user_image);
 
         if(postIdParam != null && userIdParam != null) {
             firebaseDatabase.getReference("activityStreamPosts/" + userIdParam + "/" + postIdParam).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -128,7 +133,6 @@ public class SinglePost extends Fragment {
                     imageTools.scaleImage(postImageView, getContext());
 
                     String downloadPath = currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages");
-                    System.out.println(downloadPath);
                     final StorageReference imageReference = storageReference.child(downloadPath);
                     final long ONE_MEGABYTE = 1024 * 1024;
                     imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -140,6 +144,22 @@ public class SinglePost extends Fragment {
 
                             postImageView.setImageBitmap(postWithImage.getImage());
                             imageTools.scaleImage(postImageView, getContext());
+
+                            String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
+                            final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
+                            userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                    postWithImage.setUserPhoto(userPhoto);
+                                    setUserPhoto(userPhoto);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                }
+                            });
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -156,6 +176,18 @@ public class SinglePost extends Fragment {
             });
         }
         return singlePostFragment;
+    }
+
+    private void setUserPhoto(Bitmap icon) {
+        if(icon == null) {
+            icon = BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.default_user_avatar);
+        }
+        icon = Bitmap.createScaledBitmap(icon, 500, 500, false);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getActivity().getApplicationContext().getResources(), icon);
+        final float roundPx = (float) icon.getWidth() * 0.6f;
+        roundedBitmapDrawable.setCornerRadius(roundPx);
+
+        userPhotoImageView.setImageDrawable(roundedBitmapDrawable);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

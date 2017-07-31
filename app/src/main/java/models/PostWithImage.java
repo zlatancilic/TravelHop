@@ -8,6 +8,8 @@ public class PostWithImage {
     private Bitmap image;
     private String firebaseId;
 
+    private Bitmap userPhoto;
+
     public PostWithImage() {}
 
     public PostWithImage(Post post, Bitmap image) {
@@ -37,5 +39,13 @@ public class PostWithImage {
 
     public void setFirebaseId(String firebaseId) {
         this.firebaseId = firebaseId;
+    }
+
+    public Bitmap getUserPhoto() {
+        return userPhoto;
+    }
+
+    public void setUserPhoto(Bitmap userPhoto) {
+        this.userPhoto = userPhoto;
     }
 }

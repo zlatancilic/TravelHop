@@ -161,22 +161,38 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                     imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
                         public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            int index = listOfPosts.indexOf(postWithImage);
-                            listOfPosts.get(index).setImage(bitmap);
-                            customAdapter.notifyDataSetChanged();
-                            if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
-                                boolean allImagesSet = true;
-                                for(PostWithImage post: listOfPosts) {
-                                    if(post.getImage() == null) {
-                                        allImagesSet = false;
-                                        break;
+                            final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
+                            final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
+                            userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                    int index = listOfPosts.indexOf(postWithImage);
+                                    listOfPosts.get(index).setImage(bitmap);
+                                    listOfPosts.get(index).setUserPhoto(userPhoto);
+                                    customAdapter.notifyDataSetChanged();
+                                    if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
+                                        boolean allImagesSet = true;
+                                        for(PostWithImage post: listOfPosts) {
+                                            if(post.getImage() == null && post.getUserPhoto() == null) {
+                                                allImagesSet = false;
+                                                break;
+                                            }
+                                        }
+                                        if(allImagesSet) {
+                                            swipeRefreshLayout.setRefreshing(false);
+                                        }
                                     }
+
                                 }
-                                if(allImagesSet) {
-                                    swipeRefreshLayout.setRefreshing(false);
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
                                 }
-                            }
+                            });
+
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override

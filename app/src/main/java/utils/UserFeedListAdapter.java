@@ -7,6 +7,8 @@ import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -61,6 +63,7 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             TextView tt2 = (TextView) v.findViewById(R.id.post_caption);
             TextView tt3 = (TextView) v.findViewById(R.id.post_date_created);
             ImageView iv1 = (ImageView) v.findViewById(R.id.post_image);
+            ImageView iv2 = (ImageView) v.findViewById(R.id.user_image);
 
             if (tt1 != null) {
                 tt1.setText(p.getPost().getUsername());
@@ -88,6 +91,20 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
                 iv1.setImageBitmap(tempBitmap);
                 ImageTools imageTools = new ImageTools();
                 imageTools.scaleImage(iv1, applicationContext);
+            }
+
+            if (iv2 != null) {
+                Bitmap icon = p.getUserPhoto();
+                if(icon == null) {
+                    icon = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.default_user_avatar);
+                }
+                icon = Bitmap.createScaledBitmap(icon, 500, 500, false);
+                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(applicationContext.getResources(), icon);
+                final float roundPx = (float) icon.getWidth() * 0.6f;
+                roundedBitmapDrawable.setCornerRadius(roundPx);
+                iv2.setImageDrawable(roundedBitmapDrawable);
+
+
             }
         }
 
