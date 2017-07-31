@@ -236,6 +236,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                     map.put("location", location);
                     map.put("username", currentUser.getUsername());
                     map.put("fullName", currentUser.getFullName());
+                    map.put("userId", firebaseAuth.getCurrentUser().getUid());
                     map.put("dateCreated", String.valueOf(System.currentTimeMillis() / 1000L));
 
                     uploadTask.addOnFailureListener(new OnFailureListener() {
