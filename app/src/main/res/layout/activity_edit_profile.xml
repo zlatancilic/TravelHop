@@ -86,29 +86,6 @@
                     android:layout_weight="0.15"
                     android:layout_height="match_parent"
                     android:id="@+id/edit_name_icon"
-                    android:src="@drawable/ic_font_download_black_24dp" />
-
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_weight="0.85"
-                    android:layout_height="wrap_content"
-                    android:textSize="17sp"
-                    android:id="@+id/edit_user_name"
-                    android:padding="10dp"
-                    android:background="@drawable/bottom_line_edit_text"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/edit_user_name_container">
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.15"
-                    android:layout_height="match_parent"
-                    android:id="@+id/edit_username_icon"
                     android:src="@drawable/ic_person_black_24dp" />
 
                 <EditText
@@ -116,7 +93,9 @@
                     android:layout_weight="0.85"
                     android:layout_height="wrap_content"
                     android:textSize="17sp"
-                    android:id="@+id/edit_username"
+                    android:id="@+id/edit_user_name"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:padding="10dp"
                     android:background="@drawable/bottom_line_edit_text"/>
             </LinearLayout>

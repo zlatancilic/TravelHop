@@ -63,7 +63,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
     private static final String ARG_PARAM2 = "followingStatusParam";
 
     public static String USER_NAME_EXTRA_TAG = "userName";
-    public static String USER_USERNAME_EXTRA_TAG = "userUsername";
+//    public static String USER_USERNAME_EXTRA_TAG = "userUsername";
     public static String USER_PICTURE_EXTRA_TAG = "userProfilePicture";
 
     // TODO: Rename and change types of parameters
@@ -193,7 +193,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                 @Override
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), EditProfileActivity.class);
-                    i.putExtra(USER_USERNAME_EXTRA_TAG, usernameHeaderTextView.getText());
+//                    i.putExtra(USER_USERNAME_EXTRA_TAG, usernameHeaderTextView.getText());
                     i.putExtra(USER_NAME_EXTRA_TAG, userProfileNameTextView.getText());
                     i.putExtra(USER_PICTURE_EXTRA_TAG, userProfilePicture);
                     getActivity().startActivityForResult(i, MainActivity.REQUEST_EDIT_PROFILE);

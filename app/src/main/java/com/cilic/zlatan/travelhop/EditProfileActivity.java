@@ -27,6 +27,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -35,6 +37,8 @@ import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -43,10 +47,12 @@ public class EditProfileActivity extends AppCompatActivity {
     ImageView cancelChanges;
     ImageView confirmChanges;
     EditText editUserName;
-    EditText editUserUsername;
+//    EditText editUserUsername;
 
-    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    FirebaseAuth firebaseAuth;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
 
     private final int REQUEST_CAMERA_PERMISSION = 111;
     private final int REQUEST_GALLERY_PERMISSION = 222;
@@ -55,6 +61,10 @@ public class EditProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
 
         userPhotoImageView = (ImageView) findViewById(R.id.user_profile_editing);
         changePhotoTextView = (TextView) findViewById(R.id.change_photo_label);
@@ -78,15 +88,15 @@ public class EditProfileActivity extends AppCompatActivity {
         setImage(icon);
 
         editUserName = (EditText) findViewById(R.id.edit_user_name);
-        editUserUsername = (EditText) findViewById(R.id.edit_username);
+//        editUserUsername = (EditText) findViewById(R.id.edit_username);
 
         Intent i = getIntent();
         if(i.hasExtra(UserProfile.USER_NAME_EXTRA_TAG)) {
             editUserName.setText(i.getStringExtra(UserProfile.USER_NAME_EXTRA_TAG));
         }
-        if(i.hasExtra(UserProfile.USER_USERNAME_EXTRA_TAG)) {
-            editUserUsername.setText(i.getStringExtra(UserProfile.USER_USERNAME_EXTRA_TAG));
-        }
+//        if(i.hasExtra(UserProfile.USER_USERNAME_EXTRA_TAG)) {
+//            editUserUsername.setText(i.getStringExtra(UserProfile.USER_USERNAME_EXTRA_TAG));
+//        }
         if(i.hasExtra(UserProfile.USER_PICTURE_EXTRA_TAG)) {
             setImage((Bitmap) i.getParcelableExtra(UserProfile.USER_PICTURE_EXTRA_TAG));
         }
@@ -103,6 +113,9 @@ public class EditProfileActivity extends AppCompatActivity {
         confirmChanges.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                databaseReference.child("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/fullName").setValue(String.valueOf(editUserName.getText()));
+//                databaseReference.child("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/username").setValue(String.valueOf(editUserUsername.getText()));
 
                 RoundedBitmapDrawable temp = (RoundedBitmapDrawable) userPhotoImageView.getDrawable();
                 Bitmap imageForUpload = temp.getBitmap();
