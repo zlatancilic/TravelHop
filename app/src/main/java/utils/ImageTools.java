@@ -84,4 +84,19 @@ public class ImageTools {
 
         Log.i("Test", "done");
     }
+
+    public void animateLike(final ImageView imageView, final Bitmap bitmap) {
+        imageView.animate().scaleXBy(-0.3f).scaleYBy(-0.3f).setDuration(170).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                imageView.animate().scaleXBy(0.45f).scaleYBy(0.45f).setDuration(150).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView.setImageBitmap(bitmap);
+                        imageView.animate().scaleXBy(-0.15f).scaleYBy(-0.15f).setDuration(150);
+                    }
+                });
+            }
+        });
+    }
 }

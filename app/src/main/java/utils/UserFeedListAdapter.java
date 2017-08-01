@@ -1,5 +1,7 @@
 package utils;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +45,7 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     String currentUserFirebaseId;
+    ImageTools imageTools;
 
     public UserFeedListAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
@@ -54,6 +57,7 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
         currentUserFirebaseId = firebaseAuth.getCurrentUser().getUid();
+        imageTools = new ImageTools();
     }
 
     public void setAppContext(Context appContext) {
@@ -91,7 +95,8 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
                     Toast.makeText(getContext(), p.getFirebaseId(), Toast.LENGTH_SHORT).show();
                     if(iv3 != null) {
                         if(p.isLikedByCurrentUser()) {
-                            iv3.setImageBitmap(photoNotLikedBitmap);
+                            imageTools.animateLike(iv3, photoNotLikedBitmap);
+//                            iv3.setImageBitmap(photoNotLikedBitmap);
                             p.setLikedByCurrentUser(false);
                             p.setLikeCount(p.getLikeCount() - 1);
                             tt4.setText(String.valueOf(p.getLikeCount()));
@@ -99,7 +104,8 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
 
                         }
                         else {
-                            iv3.setImageBitmap(photoLikedBitmap);
+                            imageTools.animateLike(iv3, photoLikedBitmap);
+//                            iv3.setImageBitmap(photoLikedBitmap);
                             p.setLikedByCurrentUser(true);
                             p.setLikeCount(p.getLikeCount() + 1);
                             tt4.setText(String.valueOf(p.getLikeCount()));
