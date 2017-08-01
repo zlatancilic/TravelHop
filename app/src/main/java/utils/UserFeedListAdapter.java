@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.cilic.zlatan.travelhop.R;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -62,6 +64,7 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             TextView tt1 = (TextView) v.findViewById(R.id.post_user_name);
             TextView tt2 = (TextView) v.findViewById(R.id.post_caption);
             TextView tt3 = (TextView) v.findViewById(R.id.post_date_created);
+            TextView tt4 = (TextView) v.findViewById(R.id.like_count);
             ImageView iv1 = (ImageView) v.findViewById(R.id.post_image);
             ImageView iv2 = (ImageView) v.findViewById(R.id.user_image);
 
@@ -80,6 +83,11 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             if (tt3 != null) {
                 TimeDifferenceCalculator timeDifferenceCalculator = new TimeDifferenceCalculator();
                 tt3.setText(timeDifferenceCalculator.calculateAndFormat(Long.valueOf(p.getPost().getDateCreated())));
+            }
+
+            if(tt4 != null) {
+                tt4.setText(String.valueOf(p.getLikeCount()));
+                System.out.println(String.valueOf(p.getLikeCount()));
             }
 
 

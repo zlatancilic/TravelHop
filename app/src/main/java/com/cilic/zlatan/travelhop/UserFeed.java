@@ -156,34 +156,60 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                     final PostWithImage postWithImage = new PostWithImage();
                     postWithImage.setPost(currentPost);
                     listOfPosts.add(0, postWithImage);
-                    StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    firebaseDatabase.getReference("postLikes/" + postSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onSuccess(byte[] bytes) {
-                            final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
-                            final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
-                            userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        public void onDataChange(DataSnapshot dataSnapshotInner) {
+                            final int index = listOfPosts.indexOf(postWithImage);
+                            boolean likedByCurrentUser = false;
+                            long likeCount = 0;
+                            if (dataSnapshotInner != null) {
+                                for (DataSnapshot currentLike : dataSnapshotInner.getChildren()) {
+                                    if (currentLike.getKey().equals(firebaseAuth.getCurrentUser().getUid())) {
+                                        likedByCurrentUser = true;
+                                        break;
+                                    }
+                                }
+                                likeCount = dataSnapshotInner.getChildrenCount();
+                            }
+                            listOfPosts.get(index).setLikedByCurrentUser(likedByCurrentUser);
+                            listOfPosts.get(index).setLikeCount(likeCount);
+
+                            StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
+                            final long ONE_MEGABYTE = 1024 * 1024;
+                            imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                 @Override
                                 public void onSuccess(byte[] bytes) {
-                                    Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                    int index = listOfPosts.indexOf(postWithImage);
-                                    listOfPosts.get(index).setImage(bitmap);
-                                    listOfPosts.get(index).setUserPhoto(userPhoto);
-                                    customAdapter.notifyDataSetChanged();
-                                    if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
-                                        boolean allImagesSet = true;
-                                        for(PostWithImage post: listOfPosts) {
-                                            if(post.getImage() == null && post.getUserPhoto() == null) {
-                                                allImagesSet = false;
-                                                break;
+                                    final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                                    String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
+                                    final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
+                                    userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        @Override
+                                        public void onSuccess(byte[] bytesInner) {
+                                            Bitmap userPhoto = BitmapFactory.decodeByteArray(bytesInner, 0, bytesInner.length);
+//                                            int index = listOfPosts.indexOf(postWithImage);
+                                            listOfPosts.get(index).setImage(bitmap);
+                                            listOfPosts.get(index).setUserPhoto(userPhoto);
+                                            customAdapter.notifyDataSetChanged();
+                                            if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
+                                                boolean allImagesSet = true;
+                                                for(PostWithImage post: listOfPosts) {
+                                                    if(post.getImage() == null && post.getUserPhoto() == null) {
+                                                        allImagesSet = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if(allImagesSet) {
+                                                    swipeRefreshLayout.setRefreshing(false);
+                                                }
                                             }
+
                                         }
-                                        if(allImagesSet) {
-                                            swipeRefreshLayout.setRefreshing(false);
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
                                         }
-                                    }
+                                    });
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
@@ -192,11 +218,10 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
 
                                 }
                             });
-
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
+
                         @Override
-                        public void onFailure(@NonNull Exception e) {
+                        public void onCancelled(DatabaseError databaseError) {
 
                         }
                     });

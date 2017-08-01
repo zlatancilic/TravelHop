@@ -40,9 +40,23 @@
                     android:fontFamily="sans-serif"
                     android:layout_toEndOf="@+id/user_image"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/like_count"
+                    android:layout_toStartOf="@+id/like_button"
+                    android:textAlignment="viewEnd"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="sans-serif"
+                    android:textColor="#000000"
+                    android:text="345"/>
+
                 <ImageView
                     android:layout_width="55dp"
                     android:layout_height="55dp"
+                    android:id="@+id/like_button"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:padding="7dp"

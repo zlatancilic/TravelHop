@@ -7,6 +7,24 @@ public class PostWithImage {
     private Post post;
     private Bitmap image;
     private String firebaseId;
+    private boolean likedByCurrentUser;
+    private long likeCount;
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
 
     private Bitmap userPhoto;
 
