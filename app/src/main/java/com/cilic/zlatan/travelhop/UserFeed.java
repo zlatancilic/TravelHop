@@ -155,6 +155,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                     final Post currentPost = postSnapshot.getValue(Post.class);
                     final PostWithImage postWithImage = new PostWithImage();
                     postWithImage.setPost(currentPost);
+                    postWithImage.setFirebaseId(postSnapshot.getKey());
                     listOfPosts.add(0, postWithImage);
                     firebaseDatabase.getReference("postLikes/" + postSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -186,7 +187,6 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                                         @Override
                                         public void onSuccess(byte[] bytesInner) {
                                             Bitmap userPhoto = BitmapFactory.decodeByteArray(bytesInner, 0, bytesInner.length);
-//                                            int index = listOfPosts.indexOf(postWithImage);
                                             listOfPosts.get(index).setImage(bitmap);
                                             listOfPosts.get(index).setUserPhoto(userPhoto);
                                             customAdapter.notifyDataSetChanged();
@@ -202,7 +202,6 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                                                     swipeRefreshLayout.setRefreshing(false);
                                                 }
                                             }
-
                                         }
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override

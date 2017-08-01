@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,6 +31,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
 
 import models.Post;
 import models.PostWithImage;
@@ -108,7 +111,10 @@ public class SinglePost extends Fragment {
         final TextView userNameTextView = (TextView) singlePostFragment.findViewById(R.id.post_user_name);
         final TextView postCaptionTextView = (TextView) singlePostFragment.findViewById(R.id.post_caption);
         final TextView dateCreatedTextView = (TextView) singlePostFragment.findViewById(R.id.post_date_created);
+        final TextView likeCountTextView = (TextView) singlePostFragment.findViewById(R.id.like_count);
         final ImageView postImageView = (ImageView) singlePostFragment.findViewById(R.id.post_image);
+        final ImageView likeButtonImageView = (ImageView) singlePostFragment.findViewById(R.id.like_button);
+
         userPhotoImageView = (ImageView) singlePostFragment.findViewById(R.id.user_image);
 
         if(postIdParam != null && userIdParam != null) {
@@ -119,53 +125,81 @@ public class SinglePost extends Fragment {
                     final PostWithImage postWithImage = new PostWithImage();
                     postWithImage.setPost(currentPost);
 
-                    userNameTextView.setText(postWithImage.getPost().getUsername());
-                    String boldText = postWithImage.getPost().getUsername();
-                    String normalText = " " + postWithImage.getPost().getCaption();
-                    SpannableString str = new SpannableString(boldText + normalText);
-                    str.setSpan(new StyleSpan(Typeface.BOLD), 0, boldText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    postCaptionTextView.setText(str);
-                    TimeDifferenceCalculator timeDifferenceCalculator = new TimeDifferenceCalculator();
-                    dateCreatedTextView.setText(timeDifferenceCalculator.calculateAndFormat(Long.valueOf(postWithImage.getPost().getDateCreated())));
-                    Bitmap tempBitmap = BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.loading_image);
-                    postImageView.setImageBitmap(tempBitmap);
-                    final ImageTools imageTools = new ImageTools();
-                    imageTools.scaleImage(postImageView, getContext());
-
-                    String downloadPath = currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages");
-                    final StorageReference imageReference = storageReference.child(downloadPath);
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                        @Override
-                        public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                            postWithImage.setImage(bitmap);
-                            postWithImage.setFirebaseId(dataSnapshot.getKey());
-
-                            postImageView.setImageBitmap(postWithImage.getImage());
-                            imageTools.scaleImage(postImageView, getContext());
-
-                            String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
-                            final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
-                            userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                @Override
-                                public void onSuccess(byte[] bytes) {
-                                    Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                    postWithImage.setUserPhoto(userPhoto);
-                                    setUserPhoto(userPhoto);
+                    firebaseDatabase.getReference("postLikes/" + postIdParam).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshotInner) {
+                        boolean likedByCurrentUser = false;
+                        long likeCount = 0;
+                        if (dataSnapshotInner != null) {
+                            for (DataSnapshot currentLike : dataSnapshotInner.getChildren()) {
+                                if (currentLike.getKey().equals(firebaseAuth.getCurrentUser().getUid())) {
+                                    likedByCurrentUser = true;
+                                    break;
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-
-                                }
-                            });
+                            }
+                            likeCount = dataSnapshotInner.getChildrenCount();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                        postWithImage.setLikedByCurrentUser(likedByCurrentUser);
+                        postWithImage.setLikeCount(likeCount);
 
+                        likeCountTextView.setText(String.valueOf(postWithImage.getLikeCount()));
+                        if(postWithImage.isLikedByCurrentUser()) {
+                            likeButtonImageView.setImageBitmap(BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.ic_favorite_black_24dp));
                         }
+                        userNameTextView.setText(postWithImage.getPost().getUsername());
+                        String boldText = postWithImage.getPost().getUsername();
+                        String normalText = " " + postWithImage.getPost().getCaption();
+                        SpannableString str = new SpannableString(boldText + normalText);
+                        str.setSpan(new StyleSpan(Typeface.BOLD), 0, boldText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        postCaptionTextView.setText(str);
+                        TimeDifferenceCalculator timeDifferenceCalculator = new TimeDifferenceCalculator();
+                        dateCreatedTextView.setText(timeDifferenceCalculator.calculateAndFormat(Long.valueOf(postWithImage.getPost().getDateCreated())));
+                        Bitmap tempBitmap = BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.loading_image);
+                        postImageView.setImageBitmap(tempBitmap);
+                        final ImageTools imageTools = new ImageTools();
+                        imageTools.scaleImage(postImageView, getContext());
+
+                        String downloadPath = currentPost.getDownloadPath().replace("activityStreamThumbnails", "activityStreamImages");
+                        final StorageReference imageReference = storageReference.child(downloadPath);
+                        final long ONE_MEGABYTE = 1024 * 1024;
+                        imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                                postWithImage.setImage(bitmap);
+                                postWithImage.setFirebaseId(dataSnapshot.getKey());
+
+                                postImageView.setImageBitmap(postWithImage.getImage());
+                                imageTools.scaleImage(postImageView, getContext());
+
+                                String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
+                                final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
+                                userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        postWithImage.setUserPhoto(userPhoto);
+                                        setUserPhoto(userPhoto);
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                    }
+                                });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
                     });
                 }
 
@@ -175,6 +209,7 @@ public class SinglePost extends Fragment {
                 }
             });
         }
+
         return singlePostFragment;
     }
 

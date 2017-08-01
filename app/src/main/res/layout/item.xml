@@ -55,8 +55,7 @@
                     android:id="@+id/like_button"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
-                    android:padding="7dp"
-                    android:src="@drawable/ic_favorite_border_black_24dp"/>
+                    android:padding="7dp" />
             </RelativeLayout>
 
 

@@ -21,8 +21,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cilic.zlatan.travelhop.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.w3c.dom.Text;
 
@@ -35,12 +39,21 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
 
     Context applicationContext;
 
+    FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+    String currentUserFirebaseId;
+
     public UserFeedListAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
     }
 
     public UserFeedListAdapter(Context context, int resource, List<PostWithImage> items) {
         super(context, resource, items);
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+        currentUserFirebaseId = firebaseAuth.getCurrentUser().getUid();
     }
 
     public void setAppContext(Context appContext) {
@@ -58,16 +71,45 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             v = vi.inflate(R.layout.item, null);
         }
 
-        PostWithImage p = getItem(position);
+        final PostWithImage p = getItem(position);
 
         if (p != null) {
             TextView tt1 = (TextView) v.findViewById(R.id.post_user_name);
             TextView tt2 = (TextView) v.findViewById(R.id.post_caption);
             TextView tt3 = (TextView) v.findViewById(R.id.post_date_created);
-            TextView tt4 = (TextView) v.findViewById(R.id.like_count);
+            final TextView tt4 = (TextView) v.findViewById(R.id.like_count);
             ImageView iv1 = (ImageView) v.findViewById(R.id.post_image);
             ImageView iv2 = (ImageView) v.findViewById(R.id.user_image);
-            ImageView iv3 = (ImageView) v.findViewById(R.id.like_button);
+            final ImageView iv3 = (ImageView) v.findViewById(R.id.like_button);
+
+            final Bitmap photoLikedBitmap = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.ic_favorite_black_24dp);
+            final Bitmap photoNotLikedBitmap = BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.ic_favorite_border_black_24dp);
+
+            iv3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), p.getFirebaseId(), Toast.LENGTH_SHORT).show();
+                    if(iv3 != null) {
+                        if(p.isLikedByCurrentUser()) {
+                            iv3.setImageBitmap(photoNotLikedBitmap);
+                            p.setLikedByCurrentUser(false);
+                            p.setLikeCount(p.getLikeCount() - 1);
+                            tt4.setText(String.valueOf(p.getLikeCount()));
+                            databaseReference.child("postLikes").child(p.getFirebaseId()).child(currentUserFirebaseId).removeValue();
+
+                        }
+                        else {
+                            iv3.setImageBitmap(photoLikedBitmap);
+                            p.setLikedByCurrentUser(true);
+                            p.setLikeCount(p.getLikeCount() + 1);
+                            tt4.setText(String.valueOf(p.getLikeCount()));
+                            databaseReference.child("postLikes").child(p.getFirebaseId()).child(currentUserFirebaseId).setValue(currentUserFirebaseId);
+                        }
+                    }
+                }
+            });
+
+
             if (tt1 != null) {
                 tt1.setText(p.getPost().getUsername());
             }
@@ -115,7 +157,10 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
 
             if (iv3 != null) {
                 if(p.isLikedByCurrentUser()) {
-                    iv3.setImageBitmap(BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.ic_favorite_black_24dp));
+                    iv3.setImageBitmap(photoLikedBitmap);
+                }
+                else {
+                    iv3.setImageBitmap(photoNotLikedBitmap);
                 }
             }
         }
