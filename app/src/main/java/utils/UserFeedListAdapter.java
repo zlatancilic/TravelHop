@@ -67,7 +67,7 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             TextView tt4 = (TextView) v.findViewById(R.id.like_count);
             ImageView iv1 = (ImageView) v.findViewById(R.id.post_image);
             ImageView iv2 = (ImageView) v.findViewById(R.id.user_image);
-
+            ImageView iv3 = (ImageView) v.findViewById(R.id.like_button);
             if (tt1 != null) {
                 tt1.setText(p.getPost().getUsername());
             }
@@ -111,8 +111,12 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
                 final float roundPx = (float) icon.getWidth() * 0.6f;
                 roundedBitmapDrawable.setCornerRadius(roundPx);
                 iv2.setImageDrawable(roundedBitmapDrawable);
+            }
 
-
+            if (iv3 != null) {
+                if(p.isLikedByCurrentUser()) {
+                    iv3.setImageBitmap(BitmapFactory.decodeResource(applicationContext.getResources(), R.drawable.ic_favorite_black_24dp));
+                }
             }
         }
 
