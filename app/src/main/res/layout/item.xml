@@ -47,7 +47,7 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="sans-serif"
                     android:textColor="#000000"
-                    android:text="345"/>
+                    android:text="0"/>
 
                 <ImageView
                     android:layout_width="55dp"

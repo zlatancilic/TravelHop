@@ -63,6 +63,8 @@ public class SinglePost extends Fragment {
     DatabaseReference databaseReference;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
+    PostWithImage currentPostWithImage;
+
     ImageView userPhotoImageView;
 
     private OnFragmentInteractionListener mListener;
@@ -115,6 +117,33 @@ public class SinglePost extends Fragment {
         final ImageView postImageView = (ImageView) singlePostFragment.findViewById(R.id.post_image);
         final ImageView likeButtonImageView = (ImageView) singlePostFragment.findViewById(R.id.like_button);
 
+        final Bitmap photoLikedBitmap = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.ic_favorite_black_24dp);
+        final Bitmap photoNotLikedBitmap = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.ic_favorite_border_black_24dp);
+        final ImageTools imageTools = new ImageTools();
+
+        likeButtonImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(likeButtonImageView != null) {
+                    if(currentPostWithImage.isLikedByCurrentUser()) {
+                        imageTools.animateLike(likeButtonImageView, photoNotLikedBitmap);
+                        currentPostWithImage.setLikedByCurrentUser(false);
+                        currentPostWithImage.setLikeCount(currentPostWithImage.getLikeCount() - 1);
+                        likeCountTextView.setText(String.valueOf(currentPostWithImage.getLikeCount()));
+                        databaseReference.child("postLikes").child(currentPostWithImage.getFirebaseId()).child(userIdParam).removeValue();
+
+                    }
+                    else {
+                        imageTools.animateLike(likeButtonImageView, photoLikedBitmap);
+                        currentPostWithImage.setLikedByCurrentUser(true);
+                        currentPostWithImage.setLikeCount(currentPostWithImage.getLikeCount() + 1);
+                        likeCountTextView.setText(String.valueOf(currentPostWithImage.getLikeCount()));
+                        databaseReference.child("postLikes").child(currentPostWithImage.getFirebaseId()).child(userIdParam).setValue(userIdParam);
+                    }
+                }
+            }
+        });
+
         userPhotoImageView = (ImageView) singlePostFragment.findViewById(R.id.user_image);
 
         if(postIdParam != null && userIdParam != null) {
@@ -141,6 +170,7 @@ public class SinglePost extends Fragment {
                         }
                         postWithImage.setLikedByCurrentUser(likedByCurrentUser);
                         postWithImage.setLikeCount(likeCount);
+                        postWithImage.setFirebaseId(postIdParam);
 
                         likeCountTextView.setText(String.valueOf(postWithImage.getLikeCount()));
                         if(postWithImage.isLikedByCurrentUser()) {
@@ -179,6 +209,7 @@ public class SinglePost extends Fragment {
                                     public void onSuccess(byte[] bytes) {
                                         Bitmap userPhoto = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                                         postWithImage.setUserPhoto(userPhoto);
+                                        currentPostWithImage = postWithImage;
                                         setUserPhoto(userPhoto);
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {

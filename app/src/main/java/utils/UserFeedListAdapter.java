@@ -92,11 +92,9 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
             iv3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), p.getFirebaseId(), Toast.LENGTH_SHORT).show();
                     if(iv3 != null) {
                         if(p.isLikedByCurrentUser()) {
                             imageTools.animateLike(iv3, photoNotLikedBitmap);
-//                            iv3.setImageBitmap(photoNotLikedBitmap);
                             p.setLikedByCurrentUser(false);
                             p.setLikeCount(p.getLikeCount() - 1);
                             tt4.setText(String.valueOf(p.getLikeCount()));
@@ -105,7 +103,6 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
                         }
                         else {
                             imageTools.animateLike(iv3, photoLikedBitmap);
-//                            iv3.setImageBitmap(photoLikedBitmap);
                             p.setLikedByCurrentUser(true);
                             p.setLikeCount(p.getLikeCount() + 1);
                             tt4.setText(String.valueOf(p.getLikeCount()));
