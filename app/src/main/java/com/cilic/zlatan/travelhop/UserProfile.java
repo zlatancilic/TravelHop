@@ -6,9 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -56,6 +55,7 @@ import utils.GridImageAdapter;
  * Use the {@link UserProfile#newInstance} factory method to
  * create an instance of this fragment.
  */
+@VisibleForTesting
 public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -195,7 +195,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                     Intent i = new Intent(getActivity(), EditProfileActivity.class);
 //                    i.putExtra(USER_USERNAME_EXTRA_TAG, usernameHeaderTextView.getText());
                     i.putExtra(USER_NAME_EXTRA_TAG, userProfileNameTextView.getText());
-                    i.putExtra(USER_PICTURE_EXTRA_TAG, userProfilePicture);
+//                    i.putExtra(USER_PICTURE_EXTRA_TAG, userProfilePicture);
                     getActivity().startActivityForResult(i, MainActivity.REQUEST_EDIT_PROFILE);
                 }
             });
@@ -265,16 +265,20 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
                     final Post currentPost = postSnapshot.getValue(Post.class);
                     final PostWithImage postWithImage = new PostWithImage();
                     postWithImage.setPost(currentPost);
+                    postWithImage.setFirebaseId(postSnapshot.getKey());
                     listOfPosts.add(0, postWithImage);
                     StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    final long HALF_MEGABYTE = 200 * 200;
+                    imageReference.getBytes(HALF_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
                         public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inDensity=120;
+                            options.inTargetDensity=80;
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length, options);
+
                             int index = listOfPosts.indexOf(postWithImage);
                             listOfPosts.get(index).setImage(bitmap);
-                            listOfPosts.get(index).setFirebaseId(postSnapshot.getKey());
                             customAdapter.addElements(listOfPosts);
                             if(customAdapter.checkAllDataSet((int)dataSnapshot.getChildrenCount())) {
                                 String numberOfPosts = String.valueOf(dataSnapshot.getChildrenCount());
@@ -350,6 +354,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
         //***************** POPULATE USER PROFILE PICTURE *****************//
         StorageReference imageReference = storageReference.child("userProfileImages/" + firebaseIdParam);
+        userProfilePicture = null;
         final long ONE_MEGABYTE = 1024 * 1024;
         imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override

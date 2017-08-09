@@ -2,7 +2,6 @@ package utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.cilic.zlatan.travelhop.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
-import models.Post;
 import models.PostWithImage;
 
 public class GridImageAdapter extends BaseAdapter {
@@ -21,10 +24,19 @@ public class GridImageAdapter extends BaseAdapter {
     private Context activityContext;
 
     private List listOfPosts;
+    FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+    StorageReference storageReference;
 
     public GridImageAdapter(Context c, List<PostWithImage> listOfPosts) {
         activityContext = c;
         this.listOfPosts = listOfPosts;
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase  = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+        storageReference = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -84,10 +96,11 @@ public class GridImageAdapter extends BaseAdapter {
         ImageView imageView = (ImageView) gridView.findViewById(R.id.grid_item_image);
         PostWithImage currentPost = (PostWithImage) listOfPosts.get(position);
         Bitmap imageToSet = currentPost.getImage();
-        if(imageToSet == null) {
-            imageToSet = BitmapFactory.decodeResource(activityContext.getResources(), R.drawable.loading_image);
+        if(!(imageToSet == null)) {
+//            imageToSet = BitmapFactory.decodeResource(activityContext.getResources(), R.drawable.loading_image_small);
+            imageView.setImageBitmap(imageToSet);
         }
-        imageView.setImageBitmap(imageToSet);
+//        imageView.setImageBitmap(imageToSet);
 
         return gridView;
     }
