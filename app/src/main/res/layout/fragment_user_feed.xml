@@ -38,7 +38,10 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="0.907"
-            android:id="@+id/userFeedListView">
+            android:id="@+id/userFeedListView"
+            android:fastScrollEnabled="true"
+            android:persistentDrawingCache="scrolling"
+            android:scrollingCache="false">
         </ListView>
 
 

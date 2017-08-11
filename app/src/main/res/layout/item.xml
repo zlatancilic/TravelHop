@@ -73,6 +73,7 @@
                 android:id="@+id/post_caption"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:width="0dip"
                 android:padding="10dp"
                 android:textSize="16sp" />
 

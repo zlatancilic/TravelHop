@@ -1,22 +1,16 @@
 package com.cilic.zlatan.travelhop;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -61,6 +55,8 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     ListView userFeedListView;
     SwipeRefreshLayout swipeRefreshLayout;
+    private int preLast;
+    private boolean allPostsLoaded = false;
 
     public UserFeed() {
         // Required empty public constructor
@@ -93,6 +89,21 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
         }
     }
 
+    private Runnable createRunnable(final int paramStr){
+
+        Runnable aRunnable = new Runnable(){
+            public void run(){
+                if(paramStr == listOfPosts.size()) {
+                    allPostsLoaded = true;
+                }
+                System.out.println("ALL POSTS LOADED" + allPostsLoaded);
+            }
+        };
+
+        return aRunnable;
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -101,6 +112,7 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
+
 
         swipeRefreshLayout = (SwipeRefreshLayout) fragmentView.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -130,6 +142,18 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                 }
                 swipeRefreshLayout.setEnabled(enabled);
 
+                final int lastItem = firstVisibleItem + visibleItemCount;
+
+                if(lastItem == totalItemCount)
+                {
+                    if(preLast!=lastItem)
+                    {
+                        //to avoid multiple calls for last item
+                        loadData();
+                        preLast = lastItem;
+                    }
+                }
+
             }
         });
 
@@ -147,91 +171,41 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     }
 
     private void loadData() {
-        final UserFeedListAdapter customAdapter = (UserFeedListAdapter) userFeedListView.getAdapter();
-        firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                for(final DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    final Post currentPost = postSnapshot.getValue(Post.class);
-                    final PostWithImage postWithImage = new PostWithImage();
-                    postWithImage.setPost(currentPost);
-                    postWithImage.setFirebaseId(postSnapshot.getKey());
-                    listOfPosts.add(0, postWithImage);
-                    firebaseDatabase.getReference("postLikes/" + postSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshotInner) {
-                            final int index = listOfPosts.indexOf(postWithImage);
-                            boolean likedByCurrentUser = false;
-                            long likeCount = 0;
-                            if (dataSnapshotInner != null) {
-                                for (DataSnapshot currentLike : dataSnapshotInner.getChildren()) {
-                                    if (currentLike.getKey().equals(firebaseAuth.getCurrentUser().getUid())) {
-                                        likedByCurrentUser = true;
-                                        break;
-                                    }
-                                }
-                                likeCount = dataSnapshotInner.getChildrenCount();
-                            }
-                            listOfPosts.get(index).setLikedByCurrentUser(likedByCurrentUser);
-                            listOfPosts.get(index).setLikeCount(likeCount);
-
-                            StorageReference imageReference = storageReference.child(currentPost.getDownloadPath());
-                            final long ONE_MEGABYTE = 1024 * 1024;
-                            imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                @Override
-                                public void onSuccess(byte[] bytes) {
-                                    final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes , 0, bytes.length);
-                                    String downloadUserPhotoPath = "userProfileImages/" + postWithImage.getPost().getUserId();
-                                    final StorageReference userPhotoReference = storageReference.child(downloadUserPhotoPath);
-                                    userPhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytesInner) {
-                                            Bitmap userPhoto = BitmapFactory.decodeByteArray(bytesInner, 0, bytesInner.length);
-                                            listOfPosts.get(index).setImage(bitmap);
-                                            listOfPosts.get(index).setUserPhoto(userPhoto);
-                                            customAdapter.notifyDataSetChanged();
-                                            if(listOfPosts.size() == dataSnapshot.getChildrenCount()) {
-                                                boolean allImagesSet = true;
-                                                for(PostWithImage post: listOfPosts) {
-                                                    if(post.getImage() == null && post.getUserPhoto() == null) {
-                                                        allImagesSet = false;
-                                                        break;
-                                                    }
-                                                }
-                                                if(allImagesSet) {
-                                                    swipeRefreshLayout.setRefreshing(false);
-                                                }
-                                            }
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-
-                                        }
-                                    });
-
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-
-                                }
-                            });
+        if(!allPostsLoaded) {
+            String endingTimestampPlaceholder = "0";
+            final int initialListSize = listOfPosts.size();
+            if (initialListSize != 0) {
+                endingTimestampPlaceholder = listOfPosts.get(listOfPosts.size() - 1).getPost().getDateCreated();
+            }
+            final String endingTimestamp = endingTimestampPlaceholder;
+            final UserFeedListAdapter customAdapter = (UserFeedListAdapter) userFeedListView.getAdapter();
+            firebaseDatabase.getReference("userFeedPosts/" + firebaseAuth.getCurrentUser().getUid()).orderByChild("dateCreated").limitToLast(initialListSize + 5).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    final List<DataSnapshot> tempList = new ArrayList<DataSnapshot>();
+                    for (final DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        tempList.add(0, postSnapshot);
+                    }
+                    getActivity().runOnUiThread(createRunnable((int)dataSnapshot.getChildrenCount()));
+                    for (final DataSnapshot postSnapshot : tempList) {
+                        final Post currentPost = postSnapshot.getValue(Post.class);
+                        final PostWithImage postWithImage = new PostWithImage();
+                        postWithImage.setPost(currentPost);
+                        postWithImage.setFirebaseId(postSnapshot.getKey());
+                        if (initialListSize == 0 || Long.valueOf(postWithImage.getPost().getDateCreated()) < Long.valueOf(endingTimestamp)) {
+                            listOfPosts.add(postWithImage);
+                            customAdapter.notifyDataSetChanged();
+                            customAdapter.downloadImages();
                         }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
