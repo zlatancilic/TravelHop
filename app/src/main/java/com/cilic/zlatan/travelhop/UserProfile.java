@@ -238,6 +238,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                MyFirebaseService.removeRegistration(firebaseAuth.getCurrentUser().getUid());
                                 firebaseAuth.signOut();
                                 Intent i = new Intent(getActivity(), AuthActivity.class);
                                 startActivity(i);

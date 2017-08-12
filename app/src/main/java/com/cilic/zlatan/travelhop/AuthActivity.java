@@ -433,6 +433,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         if(user != null) {
+            MyFirebaseService.sendRegistrationToServer(user.getUid());
             Intent i = new Intent(this, MainActivity.class);
             startActivity(i);
             AuthActivity.this.finish();
