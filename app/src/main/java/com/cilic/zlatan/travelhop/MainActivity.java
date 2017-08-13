@@ -1,5 +1,6 @@
 package com.cilic.zlatan.travelhop;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -149,6 +150,16 @@ public class MainActivity extends AppCompatActivity implements UserFeed.OnFragme
                 }
             }
         });
+
+        Intent i = getIntent();
+
+        if(i.hasExtra("userId")) {
+            if(i.hasExtra("followingStatus")) {
+                String fStatusInAct = i.getStringExtra("followingStatus");
+                boolean fStatusBool = fStatusInAct.equals("true");
+                openUserProfile(i.getStringExtra("userId"), fStatusBool);
+            }
+        }
 
     }
 

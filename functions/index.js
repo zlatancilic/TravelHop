@@ -19,16 +19,27 @@ exports.sendFollowerNotification = functions.database.ref('userDetails/{followed
   // Get the list of device notification tokens.
   const getDeviceTokensPromise = admin.database().ref(`/notificationTokens/${followedUid}`).once('value');
 
+  const getFollowingStatus = admin.database().ref(`/userDetails/${followerUid}/followers`).once('value');
+
   // Get the follower profile.
   const getFollowerProfilePromise = admin.auth().getUser(followerUid);
 
-  return Promise.all([getDeviceTokensPromise, getFollowerProfilePromise]).then(results => {
+  return Promise.all([getDeviceTokensPromise, getFollowerProfilePromise, getFollowingStatus]).then(results => {
     const tokensSnapshot = results[0];
     const follower = results[1];
+    const status = results[2];
+
+    const followers = Object.keys(status.val());
+    const followingBool = followers.includes(followedUid);
+    const followingBoolString = followingBool.toString();
+
+    console.log('STATUS STATUS STATUS: ', followingBool);
 
     if (!event.data.val()) {
     	return console.log('User ', followerUid, 'un-followed user', followedUid);
   	}
+
+  	if(status)
 
     // Check if there are any device tokens.
     if (!tokensSnapshot.hasChildren()) {
@@ -39,9 +50,11 @@ exports.sendFollowerNotification = functions.database.ref('userDetails/{followed
 
     // Notification details.
     const payload = {
-      notification: {
+      data: {
         title: 'You have a new follower!',
-        body: `${follower.displayName} is now following you.`
+        body: `${follower.displayName} is now following you.`,
+        follower: `${followerUid}`,
+        followingStatus: `${followingBoolString}`
       }
     };
 
