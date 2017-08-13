@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -108,6 +109,9 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 databaseReference.child("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/fullName").setValue(String.valueOf(editUserName.getText()));
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(String.valueOf(editUserName.getText())).build();
+                firebaseAuth.getCurrentUser().updateProfile(profileUpdates);
 //                databaseReference.child("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/username").setValue(String.valueOf(editUserUsername.getText()));
 
                 RoundedBitmapDrawable temp = (RoundedBitmapDrawable) userPhotoImageView.getDrawable();
