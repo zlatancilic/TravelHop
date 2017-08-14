@@ -253,6 +253,10 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
             }
         });
 
+        if (!firebaseIdParam.equals(firebaseAuth.getCurrentUser().getUid())) {
+            signOut.setVisibility(View.INVISIBLE);
+        }
+
         return profileFragment;
     }
 

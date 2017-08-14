@@ -167,7 +167,13 @@ public class UserFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     @Override
     public void onRefresh() {
         listOfPosts.clear();
+        preLast = 0;
         loadData();
+        UserFeedListAdapter customAdapter = (UserFeedListAdapter) userFeedListView.getAdapter();
+        while(!customAdapter.allImagesSet()) {
+
+        }
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void loadData() {

@@ -75,6 +75,18 @@ public class UserFeedListAdapter extends ArrayAdapter<PostWithImage>{
         downloadUserImages();
     }
 
+    public boolean allImagesSet() {
+        boolean allSet = true;
+        int size = getCount();
+        for(int i = 0; i < size; i++) {
+            if(getItem(i).getImage() == null){
+                allSet = false;
+                break;
+            }
+        }
+        return allSet;
+    }
+
     public void downloadUserImages() {
         int size = getCount();
         for(int i = 0; i < size; i++) {
