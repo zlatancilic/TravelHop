@@ -105,22 +105,16 @@ public class SearchUsers extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View userListFragmentView = inflater.inflate(R.layout.fragment_search_users, container, false);
 
         userListView = (ListView) userListFragmentView.findViewById(R.id.user_list_search);
 
         final SearchUsersListAdapter cAdapter = new SearchUsersListAdapter(userListFragmentView.getContext(), listOfUsers);
 
-//        final UserSearchListAdapter customAdapter = new UserSearchListAdapter(userListFragmentView.getContext(), R.layout.item, listOfUsers);
-//
-//        customAdapter.setAppContext(getActivity().getApplicationContext());
-
         userListView.setAdapter(cAdapter);
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(), cAdapter.getFirebaseId(position), Toast.LENGTH_SHORT).show();
                 onUserClicked(cAdapter.getFirebaseId(position), cAdapter.getFollowingStatus(position));
             }
         });
