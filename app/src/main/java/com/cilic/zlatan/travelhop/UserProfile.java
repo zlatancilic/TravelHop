@@ -29,6 +29,7 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -238,6 +239,7 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                MyFirebaseService.removeRegistration(firebaseAuth.getCurrentUser().getUid());
                                 firebaseAuth.signOut();
                                 Intent i = new Intent(getActivity(), AuthActivity.class);
                                 startActivity(i);
@@ -250,6 +252,10 @@ public class UserProfile extends Fragment implements SwipeRefreshLayout.OnRefres
 
             }
         });
+
+        if (!firebaseIdParam.equals(firebaseAuth.getCurrentUser().getUid())) {
+            signOut.setVisibility(View.INVISIBLE);
+        }
 
         return profileFragment;
     }
