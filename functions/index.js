@@ -39,8 +39,6 @@ exports.sendFollowerNotification = functions.database.ref('userDetails/{followed
     	return console.log('User ', followerUid, 'un-followed user', followedUid);
   	}
 
-  	if(status)
-
     // Check if there are any device tokens.
     if (!tokensSnapshot.hasChildren()) {
       return console.log('There are no notification tokens to send to.');

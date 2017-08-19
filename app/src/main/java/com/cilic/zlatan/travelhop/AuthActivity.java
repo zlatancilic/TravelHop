@@ -1,6 +1,8 @@
 package com.cilic.zlatan.travelhop;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +45,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import utils.ProgressDialogHandler;
+
 public class AuthActivity extends AppCompatActivity {
 
     RelativeLayout signInLayout;
@@ -61,6 +65,8 @@ public class AuthActivity extends AppCompatActivity {
     EditText signUpFullNameEditText;
     EditText signUpUsernameEditText;
     EditText signUpPasswordEditText;
+    ProgressDialog progressDialog;
+    ProgressDialogHandler progressDialogHandler;
 
     boolean emailValid = false;
     boolean passwordValid = false;
@@ -85,6 +91,7 @@ public class AuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
+
         signInLayout = (RelativeLayout) findViewById(R.id.sign_in_layout);
         signUpLayout = (RelativeLayout) findViewById(R.id.sign_up_layout);
         signInTextView = (TextView) findViewById(R.id.sign_in_textview);
@@ -101,6 +108,8 @@ public class AuthActivity extends AppCompatActivity {
         signUpFullNameEditText = (EditText) findViewById(R.id.full_name_signup_edittext);
         signUpUsernameEditText = (EditText) findViewById(R.id.username_signup_edittext);
         signUpPasswordEditText = (EditText) findViewById(R.id.password_signup_edittext);
+
+        progressDialogHandler = new ProgressDialogHandler();
 
         signInButton.setEnabled(false);
         signUpButton.setEnabled(false);
@@ -266,6 +275,7 @@ public class AuthActivity extends AppCompatActivity {
         });
 
 
+
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
@@ -273,6 +283,7 @@ public class AuthActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialogHandler.showProgressDialog(progressDialog, AuthActivity.this);
                 signIn(signInEmailEditText.getText().toString(), signInPasswordEditText.getText().toString());
             }
         });
@@ -360,6 +371,7 @@ public class AuthActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()) {
                             FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                            progressDialogHandler.hideProgressDialog(progressDialog);
                             updateUI(currentUser);
                         }
                         else {

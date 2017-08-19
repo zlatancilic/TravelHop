@@ -1,6 +1,7 @@
 package com.cilic.zlatan.travelhop;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.UserDetails;
+import utils.ProgressDialogHandler;
 
 public class ImageUploadActivity extends AppCompatActivity {
 
@@ -51,6 +53,8 @@ public class ImageUploadActivity extends AppCompatActivity {
     EditText captionEditText;
     EditText locationEditText;
     ImageCropView imageCropView;
+    ProgressDialogHandler progressDialogHandler;
+    ProgressDialog progressDialog;
 
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -75,6 +79,7 @@ public class ImageUploadActivity extends AppCompatActivity {
         captionEditText = (EditText) findViewById(R.id.caption_edittext);
         locationEditText = (EditText) findViewById(R.id.location_edittext);
         imageCropView = (ImageCropView) findViewById(R.id.selected_image_imageview_offset);
+        progressDialogHandler = new ProgressDialogHandler();
 
 
         uploadImageButton.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +87,7 @@ public class ImageUploadActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Bitmap bitmapImage = imageCropView.getViewBitmap();
                 if(bitmapImage != null) {
+                    progressDialogHandler.showProgressDialog(progressDialog, ImageUploadActivity.this);
                     uploadImage(bitmapImage);
                 }
                 else {
@@ -275,7 +281,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                                                 String tempUser = followersList.get(i).toString();
                                                 databaseReference.child("userFeedPosts").child(tempUser).child(key).setValue(map);
                                             }
-
+                                            progressDialogHandler.hideProgressDialog(progressDialog);
                                             setResult(Activity.RESULT_OK, new Intent());
                                             finish();
 

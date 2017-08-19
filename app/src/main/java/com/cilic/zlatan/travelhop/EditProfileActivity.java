@@ -2,6 +2,7 @@ package com.cilic.zlatan.travelhop;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,6 +35,8 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
+import utils.ProgressDialogHandler;
+
 public class EditProfileActivity extends AppCompatActivity {
 
     ImageView userPhotoImageView;
@@ -43,6 +46,8 @@ public class EditProfileActivity extends AppCompatActivity {
     EditText editUserName;
 //    EditText editUserUsername;
 
+    ProgressDialog progressDialog;
+    ProgressDialogHandler progressDialogHandler;
     FirebaseAuth firebaseAuth;
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     FirebaseDatabase firebaseDatabase;
@@ -59,7 +64,7 @@ public class EditProfileActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDatabase  = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
-
+        progressDialogHandler = new ProgressDialogHandler();
         userPhotoImageView = (ImageView) findViewById(R.id.user_profile_editing);
         changePhotoTextView = (TextView) findViewById(R.id.change_photo_label);
         changePhotoTextView.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +112,7 @@ public class EditProfileActivity extends AppCompatActivity {
         confirmChanges.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialogHandler.showProgressDialog(progressDialog, EditProfileActivity.this);
 
                 databaseReference.child("userDetails/" + firebaseAuth.getCurrentUser().getUid() + "/fullName").setValue(String.valueOf(editUserName.getText()));
                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -126,6 +132,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        progressDialogHandler.hideProgressDialog(progressDialog);
                         setResult(Activity.RESULT_OK);
                         finish();
                     }
