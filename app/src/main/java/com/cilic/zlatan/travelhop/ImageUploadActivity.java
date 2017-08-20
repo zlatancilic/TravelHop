@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.UserDetails;
+import utils.ImageTools;
 import utils.ProgressDialogHandler;
 
 public class ImageUploadActivity extends AppCompatActivity {
@@ -55,6 +57,7 @@ public class ImageUploadActivity extends AppCompatActivity {
     ImageCropView imageCropView;
     ProgressDialogHandler progressDialogHandler;
     ProgressDialog progressDialog;
+    ImageTools imageTools = new ImageTools();
 
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -204,9 +207,11 @@ public class ImageUploadActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadImage(final Bitmap image) {
+    private void uploadImage(Bitmap imageFull) {
         final String caption = captionEditText.getText().toString();
         final String location = locationEditText.getText().toString();
+
+        final Bitmap image = imageTools.scaleForUpload(1080, imageFull);
 
         Bitmap thumbnailImage = EditProfileActivity.cropToSquare(image);
         final Bitmap thumbnailForUpload = Bitmap.createScaledBitmap(thumbnailImage, 120, 120, false);

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 public class ImageTools {
 
@@ -87,5 +88,24 @@ public class ImageTools {
                 });
             }
         });
+    }
+
+    public Bitmap scaleForUpload(float bounding, Bitmap bitmap) {
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
+        if(height <= bounding && width <= bounding) {
+            return bitmap;
+        }
+
+        float xScale = bounding / width;
+        float yScale = bounding/ height;
+        float scale = (xScale <= yScale) ? xScale : yScale;
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+
+        return scaledBitmap;
     }
 }
